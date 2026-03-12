@@ -1,14 +1,14 @@
 from flask import Flask, request, render_template_string
 import requests
 import json
-
+import os
 app = Flask(__name__)
 
 # =========================================================
 # Evangelista IA v3.0 - Arquitectura Full-Stack Pura
 # =========================================================
 
-API_KEY = "AIzaSyDjweU0L2QMI-5ayURFPq8c4tWHoATPcj8" 
+API_KEY = os.environ.get("GEMINI_API_KEY")
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
 
 instruccion_sistema = """
