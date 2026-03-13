@@ -111,11 +111,35 @@ def preguntar():
     except Exception as e:
         return {"respuesta": f"Fallo interno del servidor: {str(e)}"}
 
-# Encendido del motor
-if __name__ == "__main__":
-    print("=====================================================")
-    print(" SERVIDOR ACTIVO: Abre tu navegador web y entra a:")
-    print(" http://127.0.0.1:8080")
-    print("=====================================================")
-    app.run(host="0.0.0.0", port=8080)
+ # ==========================================
+ # CONEXIÓN OMNICANAL: WEBHOOK DE WHATSAPP
+ # ==========================================
+ # Esta es nuestra contraseña inventada para que Meta nos reconozca
+VERIFY_TOKEN = "Evangelista_Secreto_2026"
+
+@app.route("/webhook", methods=["GET", "POST"])
+def webhook():
+    # 1. FASE DE VERIFICACIÓN (Meta tocando la puerta)
+    if request.method == "GET":
+        mode = request.args.get("hub.mode")
+        token = request.args.get("hub.verify_token")
+        challenge = request.args.get("hub.challenge")
+
+        if mode == "subscribe" and token == VERIFY_TOKEN:
+            print("¡WEBHOOK VERIFICADO POR META!")
+            return challenge, 200
+        else:
+            return "Error de validacion", 403
+
+    # 2. FASE DE RECEPCIÓN (Aquí llegarán los mensajes en el futuro)
+    elif request.method == "POST":
+        data = request.get_json()
+        print("Mensaje recibido de WhatsApp:", data)
+        return "OK", 200
+    if __name__ == "__main__":
+            print("=====================================================")
+            print(" SERVIDOR ACTIVO: Abre tu navegador web y entra a:")
+            print(" http://127.0.0.1:8080")
+            print("=====================================================")
+            app.run(host="0.0.0.0", port=8080)
 
