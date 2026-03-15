@@ -1,0 +1,56 @@
+import os
+import json
+import requests
+from flask import Flask, request, render_template_string, jsonify
+
+app = Flask(__name__)
+
+# =========================================================
+# CONFIGURACIÓN (Gemini)
+# =========================================================
+API_KEY = os.environ.get("GEMINI_API_KEY")
+URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+
+instruccion_sistema = "Eres un evangelista y apologista experto..."
+
+# =========================================================
+# WEBHOOK DE WHATSAPP (HANDSHAKE)
+# =========================================================
+@app.route("/webhook", methods=["GET", "POST"])
+def webhook():
+    if request.method == "GET":
+        mode = request.args.get("hub.mode")
+        token = request.args.get("hub.verify_token")
+        challenge = request.args.get("hub.challenge")
+
+        # Prioridad: Variable de Render, si no existe usa 'luis'
+        token_esperado = os.environ.get("VERIFY_TOKEN", "luis")
+
+        if mode == "subscribe" and token == token_esperado:
+            print("✅ WEBHOOK VERIFICADO")
+            return challenge, 200
+        return "Error de validacion", 403
+
+    elif request.method == "POST":
+        data = request.get_json()
+        print("📩 Mensaje de WhatsApp:", data)
+        return "OK", 200
+
+# =========================================================
+# INTERFAZ WEB Y LOGICA EXISTENTE
+# =========================================================
+# (Mantén aquí tu HTML_TEMPLATE y la ruta /preguntar igual que antes)
+@app.route("/")
+def home():
+    return render_template_string(HTML_TEMPLATE)
+
+@app.route("/preguntar", methods=["POST"])
+def preguntar():
+    # ... tu lógica de preguntar ...
+    return {"respuesta": "Copia tu lógica de preguntar aquí"}
+
+if __name__ == "__main__":
+    # CRÍTICO PARA RENDER: Usar el puerto que ellos asignen
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
+
