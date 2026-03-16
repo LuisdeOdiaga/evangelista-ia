@@ -58,15 +58,15 @@ def webhook():
             headers_wa = {"Authorization": f"Bearer {WHATSAPP_TOKEN}", "Content-Type": "application/json"}
             payload_wa = {"messaging_product": "whatsapp", "to": numero_usuario, "type": "text", "text": {"body": respuesta_ia}}
             
-            requests.post(url_whatsapp, json=payload_wa, headers=headers_wa)
-            print(f"--- RESPUESTA ENVIADA A WHATSAPP ---")
+            res_wa = requests.post(url_whatsapp, json=payload_wa, headers=headers_wa)
+            print(f"--- STATUS META: {res_wa.status_code} - {res_wa.text} ---")
 
     except Exception as e:
         print(f"Error general en webhook: {e}")
         
     return "OK", 200
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+            if __name__ == "__main__":
+                 port = int(os.environ.get("PORT", 8080))
+                 app.run(host="0.0.0.0", port=port)
 
