@@ -12,7 +12,7 @@ PHONE_ID = os.environ.get("PHONE_NUMBER_ID")
 
 # --- EL CAMBIO MAESTRO: Gemini 1.5 Flash (Bypass de Cuota) ---
 
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={API_KEY}"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={API_KEY}"
 
 SISTEMA = """Eres un evangelista y un apologista cristiano de nivel experto. 
 Tienes conocimiento absoluto de la Biblia, teología y filosofía. Tu misión es defender 
