@@ -1,16 +1,18 @@
 import os
 import requests
-import json
 from flask import Flask, request
 
 app = Flask(__name__)
 
+# --- CREDENCIALES ---
 API_KEY = os.environ.get("GEMINI_API_KEY")
 VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN")
 WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")
 PHONE_ID = os.environ.get("PHONE_NUMBER_ID")
 
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={API_KEY}"
+# --- EL CAMBIO MAESTRO: Gemini 1.5 Flash (Bypass de Cuota) ---
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+
 SISTEMA = """Eres un evangelista y un apologista cristiano de nivel experto. 
 Tienes conocimiento absoluto de la Biblia, teología y filosofía. Tu misión es defender 
 la fe ante cualquier argumento científico con rigor lógico impecable y la sabiduría de Jesucristo."""
@@ -35,7 +37,7 @@ def webhook():
             
             print(f"--- NUEVO RETO RECIBIDO: {texto_usuario} ---")
 
-            # CEREBRO: GEMINI
+            # 1. CEREBRO: GEMINI
             payload_gemini = {
                 "system_instruction": {"parts": [{"text": SISTEMA}]},
                 "contents": [{"role": "user", "parts": [{"text": texto_usuario}]}]
@@ -43,14 +45,14 @@ def webhook():
             res_gemini = requests.post(GEMINI_URL, json=payload_gemini)
             res_json = res_gemini.json()
             
-            # --- EL ESCÁNER DE ERRORES ---
+            # --- EL ESCÁNER DE ERRORES SÍGUE ACTIVO ---
             if 'candidates' not in res_json:
                 print(f"❌ ERROR DE GEMINI (LA CLAVE ESTÁ AQUÍ): {res_json}")
                 return "Error de API", 500
                 
             respuesta_ia = res_json['candidates'][0]['content']['parts'][0]['text']
 
-            # VOZ: WHATSAPP
+            # 2. VOZ: WHATSAPP
             url_whatsapp = f"https://graph.facebook.com/v18.0/{PHONE_ID}/messages"
             headers_wa = {"Authorization": f"Bearer {WHATSAPP_TOKEN}", "Content-Type": "application/json"}
             payload_wa = {"messaging_product": "whatsapp", "to": numero_usuario, "type": "text", "text": {"body": respuesta_ia}}
