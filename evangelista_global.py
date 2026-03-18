@@ -24,7 +24,7 @@ Responde con profundidad, rigor histórico y bíblico. Mantén un tono respetuos
 
 # El Campeón Peso Pesado
 model = genai.GenerativeModel(
-    model_name='gemini-2.5-pro',
+    model_name='gemini-2.5-flash',
     system_instruction=SISTEMA
 )
 
