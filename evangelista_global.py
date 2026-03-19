@@ -3,7 +3,8 @@ import google.generativeai as genai
 from pinecone import Pinecone
 import os
 import time
-
+from gtts import gTTS
+import io
 # Configuración de la interfaz
 st.set_page_config(page_title="Evangelista IA", page_icon="✝️")
 st.title("✝️ Evangelista IA: Memoria Permanente")
@@ -77,6 +78,13 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
             
             st.markdown(respuesta.text)
             st.session_state.messages.append({"role": "assistant", "content": respuesta.text})
+           
+            # 3.5 Generar voz con gTTS
+            tts = gTTS(text=respuesta.text, lang='es', tld='com.mx')
+            audio_fp = io.BytesIO()
+            tts.write_to_fp(audio_fp)
+            audio_fp.seek(0)
+            st.audio(audio_fp, format='audio/mp3')
 
             # 4. Guardar la nueva conversación en la Memoria Permanente
             texto_a_guardar = f"Usuario: {prompt} | Evangelista: {respuesta.text[:500]}..."
