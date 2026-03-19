@@ -87,11 +87,10 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
             texto_limpio = re.sub(r'(\d+):(\d+)', r'\1 versículo \2', texto_limpio)
         
             # El Radar: Detecta el idioma, si falla por algún símbolo, asume español.
-                    try:
-                        idioma =
-            detect(texto_limpio)
-                    except:
-                        idioma = 'es'
+            try:
+                idioma = detect(texto_limpio)
+            except:
+                idioma = 'es'
             
             # Mantiene el acento latino solo si es español, si es otro idioma usa el acento nativo.
             acento = 'com.mx' if idioma == 'es' else 'com'
