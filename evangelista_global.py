@@ -32,7 +32,7 @@ model = genai.GenerativeModel(model_name='gemini-2.5-flash', system_instruction=
 # Función para traducir texto a Matemáticas (Vectores de 768 dimensiones)
 def obtener_vector(texto):
     resultado = genai.embed_content(
-        model="models/text-embedding-004",
+        model="models/gemini-embedding-001",
         content=texto
     )
     return resultado['embedding']
