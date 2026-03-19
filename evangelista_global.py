@@ -79,8 +79,12 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
             st.markdown(respuesta.text)
             st.session_state.messages.append({"role": "assistant", "content": respuesta.text})
            
-            # 3.5 Generar voz con gTTS
-            tts = gTTS(text=respuesta.text, lang='es', tld='com.mx')
+            # 3.5 Generar voz con gTTS (Con Filtro Fonético)
+            import re
+            texto_limpio = respuesta.text.replace("*", "").replace("#", "").replace("_", "")
+            texto_limpio = re.sub(r'(\d+):(\d+)', r'\1 versículo \2', texto_limpio)
+        
+            tts = gTTS(text=texto_limpio, lang='es', tld='com.mx')
             audio_fp = io.BytesIO()
             tts.write_to_fp(audio_fp)
             audio_fp.seek(0)
