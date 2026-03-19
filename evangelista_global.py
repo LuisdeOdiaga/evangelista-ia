@@ -90,8 +90,8 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
             try:
                 idioma =
             detect(texto_limpio)
-                    except:
-                        idioma = 'es'
+            except:
+                idioma = 'es'
             
             # Mantiene el acento latino solo si es español, si es otro idioma usa el acento nativo.
             acento = 'com.mx' if idioma == 'es' else 'com'
