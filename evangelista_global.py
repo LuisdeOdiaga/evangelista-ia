@@ -33,7 +33,8 @@ model = genai.GenerativeModel(model_name='gemini-2.5-flash', system_instruction=
 def obtener_vector(texto):
     resultado = genai.embed_content(
         model="models/gemini-embedding-001",
-        content=texto
+        content=texto,
+        output_dimensionality=768
     )
     return resultado['embedding']
 
