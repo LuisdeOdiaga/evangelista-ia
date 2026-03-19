@@ -2,3 +2,5 @@ streamlit
 google-generativeai
 pinecone
 gTTS
+langdetect
+
