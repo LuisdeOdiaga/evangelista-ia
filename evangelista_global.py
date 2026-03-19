@@ -79,12 +79,23 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
             st.markdown(respuesta.text)
             st.session_state.messages.append({"role": "assistant", "content": respuesta.text})
            
-            # 3.5 Generar voz con gTTS (Con Filtro Fonético)
+            # 3.5 Generar voz con gTTS (Con Radar Global Políglota)
             import re
+            from langdetect import detect
+        
             texto_limpio = respuesta.text.replace("*", "").replace("#", "").replace("_", "")
             texto_limpio = re.sub(r'(\d+):(\d+)', r'\1 versículo \2', texto_limpio)
         
-            tts = gTTS(text=texto_limpio, lang='es', tld='com.mx')
+            # El Radar: Detecta el idioma, si falla por algún símbolo, asume español.
+            try:
+            idioma = detect(texto_limpio)
+            except:
+            idioma = 'es'
+            
+            # Mantiene el acento latino solo si es español, si es otro idioma usa el acento nativo.
+            acento = 'com.mx' if idioma == 'es' else 'com'
+        
+            tts = gTTS(text=texto_limpio, lang=idioma, tld=acento)
             audio_fp = io.BytesIO()
             tts.write_to_fp(audio_fp)
             audio_fp.seek(0)
