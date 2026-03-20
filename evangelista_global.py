@@ -77,6 +77,7 @@ with st.sidebar:
                 # 3. Vectorización y Subida a Pinecone
                 for i, fragmento in enumerate(fragmentos):
                     vector = obtener_vector(fragmento) # Usamos tu función existente
+                    time.sleep(3)
                     id_unico = f"doc_{archivo_pdf.name}_{i}"
                     index.upsert(vectors=[{
                         "id": id_unico,
