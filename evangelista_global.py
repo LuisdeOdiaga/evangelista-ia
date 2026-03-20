@@ -5,7 +5,7 @@ import os
 import time
 from gtts import gTTS
 import io
-import PyPDF2
+import PyPDF2  # <--- ¡ESTA ES LA LLAVE MAESTRA QUE FALTA!
 # Configuración de la interfaz
 st.set_page_config(page_title="Evangelista IA", page_icon="✝️")
 st.title("✝️ Evangelista IA: Juan 20:30-31")
