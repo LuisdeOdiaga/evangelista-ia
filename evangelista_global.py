@@ -9,36 +9,6 @@ import PyPDF2  # <--- ¡ESTA ES LA LLAVE MAESTRA QUE FALTA!
 # Configuración de la interfaz
 st.set_page_config(page_title="Evangelista IA", page_icon="✝️")
 st.title("✝️ Evangelista IA: Juan 20:30-31")
-# --- PANEL LATERAL: INGESTA DE CONOCIMIENTO (PDF) ---
-with st.sidebar:
-    st.header("📚 Ingesta Teológica")
-    archivo_pdf = st.file_uploader("Sube un libro o documento PDF", type="pdf")
-    
-    if archivo_pdf is not None:
-        if st.button("🧠 Memorizar Documento"):
-            with st.spinner("Devorando y vectorizando libro..."):
-                # 1. Extraer texto del PDF
-                lector = PyPDF2.PdfReader(archivo_pdf)
-                texto_completo = ""
-                for pagina in lector.pages:
-                    texto_completo += pagina.extract_text() + "\n"
-                
-                # 2. Fragmentación (Chunking) - Pedazos de 1000 caracteres
-                fragmentos = [texto_completo[i:i+1000] for i in range(0, len(texto_completo), 1000)]
-                
-                # 3. Vectorización y Subida a Pinecone
-                for i, fragmento in enumerate(fragmentos):
-                    vector = obtener_vector(fragmento) # Usamos tu función existente
-                    id_unico = f"doc_{archivo_pdf.name}_{i}"
-                    index.upsert(vectors=[{
-                        "id": id_unico,
-                        "values": vector,
-                        "metadata": {"texto": fragmento, "origen": archivo_pdf.name}
-                    }])
-                
-                st.success(f"¡Libro asimilado! {len(fragmentos)} fragmentos guardados en la memoria inmortal.")
-# ---------------------------------------------------
-
 st.markdown("### Revelando a Jesús el Cristo al mundo")
 
 # Seguridad: Leer llaves desde Render
@@ -76,7 +46,7 @@ def obtener_vector(texto):
     return resultado['embedding']
 
 # Memoria de pantalla (Streamlit)
-if "messages" not in st.session_state:
+#if "---messages" not in st.session_state:
     st.session_state.messages = []
 
 for message in st.session_state.messages:
@@ -84,6 +54,35 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Cuando el usuario escribe...
+# --- PANEL LATERAL: INGESTA DE CONOCIMIENTO (PDF) ---
+with st.sidebar:
+    st.header("📚 Ingesta Teológica")
+    archivo_pdf = st.file_uploader("Sube un libro o documento PDF", type="pdf")
+    
+    if archivo_pdf is not None:
+        if st.button("🧠 Memorizar Documento"):
+            with st.spinner("Devorando y vectorizando libro..."):
+                # 1. Extraer texto del PDF
+                lector = PyPDF2.PdfReader(archivo_pdf)
+                texto_completo = ""
+                for pagina in lector.pages:
+                    texto_completo += pagina.extract_text() + "\n"
+                
+                # 2. Fragmentación (Chunking) - Pedazos de 1000 caracteres
+                fragmentos = [texto_completo[i:i+1000] for i in range(0, len(texto_completo), 1000)]
+                
+                # 3. Vectorización y Subida a Pinecone
+                for i, fragmento in enumerate(fragmentos):
+                    vector = obtener_vector(fragmento) # Usamos tu función existente
+                    id_unico = f"doc_{archivo_pdf.name}_{i}"
+                    index.upsert(vectors=[{
+                        "id": id_unico,
+                        "values": vector,
+                        "metadata": {"texto": fragmento, "origen": archivo_pdf.name}
+                    }])
+                
+                st.success(f"¡Libro asimilado! {len(fragmentos)} fragmentos guardados en la memoria inmortal.")
+# ---------------------------------------------------
 if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
