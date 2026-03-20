@@ -3,4 +3,4 @@ google-generativeai
 pinecone
 gTTS
 langdetect
-
+PyPDF2
