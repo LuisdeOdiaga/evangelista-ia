@@ -34,7 +34,11 @@ Tus directrices irrompibles son:
 4. Fidelidad: Mantén un tono majestuoso, pastoral, profundo y estrictamente fiel a la Palabra de Dios.
 5. Apologética de Alto Nivel: Frente a argumentos ateos, escépticos o ataques a la fe, no respondas con religiosidad vacía. Desmonta las falacias lógicas con rigor filosófico, evidencia histórica y textual (1 Pedro 3:15), demostrando la superioridad de la cosmovisión bíblica y llevando el debate de vuelta a la cruz."""
 
-model = genai.GenerativeModel(model_name='gemini-2.5-flash', system_instruction=SISTEMA_ADN)
+model = genai.GenerativeModel(
+    model_name='gemini-2.5-flash',
+    system_instruction=SISTEMA_ADN,
+    tools='google_search_retrieval'
+)
 
 # Función para traducir texto a Matemáticas (Vectores de 768 dimensiones)
 def obtener_vector(texto):
