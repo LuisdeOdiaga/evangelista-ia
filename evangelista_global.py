@@ -111,34 +111,30 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
                 prompt_enriquecido = f"{contexto}\n\nPREGUNTA ACTUAL DEL USUARIO:\n{prompt}"
 
             # 3. Hablar con Gemini
-            historial = [{"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]} for m in st.session_state.messages[:-1]]
+            historial = [{"role": "user" if m["role"] == "user" else "model", "parts": m["content"]} for m in st.session_state.messages]
             chat = model.start_chat(history=historial)
             respuesta = chat.send_message(prompt_enriquecido)
             
+            # --- IMPRESIÓN EN PANTALLA ---
             st.markdown(respuesta.text)
             st.session_state.messages.append({"role": "assistant", "content": respuesta.text})
-           
-            # 3.5 Generar voz con gTTS (Con Radar Global Políglota)
-            import re
-            from langdetect import detect
-        
-            texto_limpio = respuesta.text.replace("*", "").replace("#", "").replace("_", "")
-            texto_limpio = re.sub(r'(\d+):(\d+)', r'\1 versículo \2', texto_limpio)
-        
-            # El Radar: Detecta el idioma, si falla por algún símbolo, asume español.
-            try:
-                idioma = detect(texto_limpio)
-            except:
-                idioma = 'es'
             
-            # Mantiene el acento latino solo si es español, si es otro idioma usa el acento nativo.
-            acento = 'com.mx' if idioma == 'es' else 'com'
-        
-            tts = gTTS(text=texto_limpio, lang=idioma, tld=acento)
-            audio_fp = io.BytesIO()
-            tts.write_to_fp(audio_fp)
-            audio_fp.seek(0)
-            st.audio(audio_fp, format='audio/mp3')
+            # --- MOTOR DE VOZ (Sintetizador neuronal) ---
+            with st.spinner("🎙️ Sintetizando sermón en audio..."):
+                try:
+                    # 1. Limpiamos el texto de asteriscos de Markdown
+                    texto_limpio = respuesta.text.replace("*", "").replace("#", "")
+                    
+                    # 2. Generamos el audio directamente en la memoria RAM
+                    tts = gTTS(text=texto_limpio, lang='es', tld='com.mx')
+                    audio_bytes = io.BytesIO()
+                    tts.write_to_fp(audio_bytes)
+                    audio_bytes.seek(0) # Rebobinamos la cinta de audio
+                    
+                    # 3. Desplegamos el reproductor en la interfaz
+                    st.audio(audio_bytes, format='audio/mp3')
+                except Exception as e:
+                    st.error(f"Error en las cuerdas vocales de la IA: {e}")
 
             # 4. Guardar la nueva conversación en la Memoria Permanente
             texto_a_guardar = f"Usuario: {prompt} | Evangelista: {respuesta.text[:500]}..."
