@@ -11,6 +11,56 @@ st.set_page_config(page_title="Evangelista IA", page_icon="✝️")
 st.title("✝️ Evangelista IA: Juan 20:30-31")
 st.markdown("### Revelando a Jesús el Cristo al mundo")
 
+# --- TRAJE DE GALA (Inyección de Interfaz UI/UX) ---
+st.markdown("""
+<style>
+    /* Fondo principal modo oscuro ministerial */
+    .stApp {
+        background-color: #0b0f19;
+        color: #f1f5f9;
+    }
+    /* Estilo del Panel Lateral */
+    [data-testid="stSidebar"] {
+        background-color: #161b22;
+        border-right: 1px solid #334155;
+    }
+    /* Título majestuoso */
+    h1, h3 {
+        color: #a78bfa !important;
+        font-family: 'Helvetica Neue', sans-serif;
+    }
+    /* Botones de acción (Morado Apologético) */
+    div.stButton > button:first-child {
+        background-color: #5e17eb;
+        color: white;
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+        transition: all 0.3s ease;
+        font-weight: bold;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #7b42f5;
+        transform: scale(1.02);
+    }
+    /* Burbujas del chat */
+    [data-testid="stChatMessage"] {
+        background-color: #1e293b;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 12px;
+        border: 1px solid #475569;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    /* Caja donde escribe el usuario */
+    [data-testid="stChatInput"] {
+        background-color: #0f172a;
+        border-color: #5e17eb;
+    }
+</style>
+""", unsafe_allow_html=True)
+# ---------------------------------------------------
+
 # Seguridad: Leer llaves desde Render
 api_key_google = os.getenv("GOOGLE_API_KEY")
 api_key_pinecone = os.getenv("PINECONE_API_KEY")
@@ -37,7 +87,6 @@ Tus directrices irrompibles son:
 model = genai.GenerativeModel(
     model_name='gemini-2.5-flash',
     system_instruction=SISTEMA_ADN,
-    tools='google_search'
 )
 
 # Función para traducir texto a Matemáticas (Vectores de 768 dimensiones)
