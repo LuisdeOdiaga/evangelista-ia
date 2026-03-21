@@ -4,3 +4,4 @@ pinecone
 gTTS
 langdetect
 PyPDF2
+Pillow

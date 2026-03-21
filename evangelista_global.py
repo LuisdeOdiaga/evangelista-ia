@@ -145,6 +145,10 @@ with st.sidebar:
                     }])
                 
                 st.success(f"¡Libro asimilado! {len(fragmentos)} fragmentos guardados en la memoria inmortal.")
+# --- MOTOR VISUAL ---
+    st.markdown("---")
+    st.header("👁️ Visión Teológica")
+    archivo_imagen = st.file_uploader("Sube una imagen (Papiro, texto, pintura)", type=["jpg", "png", "jpeg"])
 # ---------------------------------------------------
 if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -172,7 +176,13 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
             # 3. Hablar con Gemini
             historial = [{"role": "user" if m["role"] == "user" else "model", "parts": m["content"]} for m in st.session_state.messages]
             chat = model.start_chat(history=historial)
-            respuesta = chat.send_message(prompt_enriquecido)
+            # Lógica de Visión Multimodal
+            if archivo_imagen is not None:
+                from PIL import Image
+                imagen_abierta = Image.open(archivo_imagen)
+                respuesta = chat.send_message([prompt_enriquecido, imagen_abierta])
+            else:
+                respuesta = chat.send_message(prompt_enriquecido)
             
             # --- IMPRESIÓN EN PANTALLA ---
             st.markdown(respuesta.text)
