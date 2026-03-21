@@ -174,8 +174,11 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
                 prompt_enriquecido = f"{contexto}\n\nPREGUNTA ACTUAL DEL USUARIO:\n{prompt}"
 
             # 3. Hablar con Gemini
-            historial = [{"role": "user" if m["role"] == "user" else "model", "parts": m["content"]} for m in st.session_state.messages]
+            # --- PROTECCIÓN DE MEMORIA (Ventana Deslizante) ---
+            mensajes_recientes = st.session_state.messages[-10:]
+            historial = [{"role": "user" if m["role"] == "user" else "model", "parts": m["content"]} for m in mensajes_recientes]
             chat = model.start_chat(history=historial)
+            # --------------------------------------------------
             # Lógica de Visión Multimodal
             if archivo_imagen is not None:
                 from PIL import Image
@@ -218,4 +221,18 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
 
         except Exception as e:
             st.error(f"Error en los sistemas: {e}")
+
+            # --- MOTOR DE EXPORTACIÓN (Impresora de Sermones) ---
+            st.markdown("---")
+            # 1. Preparamos el documento con un encabezado profesional
+            documento_final = f"=== ESTUDIO BÍBLICO: EVANGELISTA IA ===\n\nPREGUNTA DEL USUARIO:\n{prompt}\n\nRESPUESTA TEOLÓGICA:\n{respuesta.text}\n\n======================================="
+            
+            # 2. Generamos el botón de descarga nativo
+            st.download_button(
+                label="📥 Descargar Estudio Bíblico",
+                data=documento_final,
+                file_name="sermon_evangelista.txt",
+                mime="text/plain"
+            )
+            # ----------------------------------------------------
 
