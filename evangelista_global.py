@@ -52,6 +52,12 @@ st.markdown("""
         border: 1px solid #475569;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
+    /* Letras blancas brillantes a prueba de balas */
+    [data-testid="stChatMessage"] p, 
+    [data-testid="stChatMessage"] li, 
+    [data-testid="stChatMessage"] span {
+        color: #ffffff !important;
+    }
     /* Caja donde escribe el usuario */
     [data-testid="stChatInput"] {
         background-color: #0f172a;
