@@ -5,11 +5,34 @@ import os
 import time
 from gtts import gTTS
 import io
+import base64
 import PyPDF2  # <--- ¡ESTA ES LA LLAVE MAESTRA QUE FALTA!
 # Configuración de la interfaz
 st.set_page_config(page_title="Evangelista IA", page_icon="✝️")
 st.title("✝️ Evangelista IA: Juan 20:30-31")
 st.markdown("### Revelando a Jesús el Cristo al mundo")
+
+# --- MUTACIÓN A APP NATIVA (PWA Nivel Dios) ---
+manifest_json = """
+{
+  "name": "Evangelista IA Apologética",
+  "short_name": "Evangelista",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#5e17eb",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3004/3004458.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+"""
+b64_manifest = base64.b64encode(manifest_json.encode('utf-8')).decode('utf-8')
+st.markdown(f'<link rel="manifest" href="data:application/manifest+json;base64,{b64_manifest}">', unsafe_allow_html=True)
+# ----------------------------------------------
 
 # --- TRAJE DE GALA (Inyección de Interfaz UI/UX) ---
 st.markdown("""
