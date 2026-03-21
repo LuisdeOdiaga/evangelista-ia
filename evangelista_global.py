@@ -37,7 +37,7 @@ Tus directrices irrompibles son:
 model = genai.GenerativeModel(
     model_name='gemini-2.5-flash',
     system_instruction=SISTEMA_ADN,
-    tools='google_search_retrieval'
+    tools='google_search'
 )
 
 # Función para traducir texto a Matemáticas (Vectores de 768 dimensiones)
