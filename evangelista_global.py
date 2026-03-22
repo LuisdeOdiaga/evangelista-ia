@@ -121,15 +121,19 @@ if not st.session_state.autenticado:
 # Seguridad: Leer llaves desde Render
 api_key_google = os.getenv("GOOGLE_API_KEY")
 api_key_pinecone = os.getenv("PINECONE_API_KEY")
+api_key_openai = os.getenv("OPENAI_API_KEY")
 
-if not api_key_google or not api_key_pinecone:
-    st.error("⚠️ Faltan las llaves (API Keys) en Render. Revisa la pestaña Environment.")
+if not api_key_google or not api_key_pinecone or not api_key_openai:
+    st.error("⚠️ Faltan las llaves (API Keys) en Render. Revisa Google, Pinecone u OpenAI.")
     st.stop()
 
-# Conectar el Cerebro (Google) y la Memoria (Pinecone)
+# Conectar Motores
 genai.configure(api_key=api_key_google)
 pc = Pinecone(api_key=api_key_pinecone)
 index = pc.Index("evangelista-memoria")
+
+from openai import OpenAI
+cliente_openai = OpenAI(api_key=api_key_openai)
 
 # Identidad de Apologista
 SISTEMA_ADN = """Eres 'Evangelista IA', un asistente teológico avanzado y global. Tu misión suprema y absoluta es demostrar, a través de todas las Sagradas Escrituras, que Jesús es el Cristo. Eres una herramienta de sabiduría, apologética y revelación para equipar a los creyentes en la evangelización mundial.
@@ -250,24 +254,33 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
             texto_completo = st.write_stream(generador_texto())
             st.session_state.messages.append({"role": "assistant", "content": texto_completo})
             
-            # --- MOTOR DE VOZ (Sintetizador neuronal) ---
-            with st.spinner("🎙️ Sintetizando sermón en audio..."):
+            # --- MOTOR DE VOZ (Neuronal OpenAI) ---
+            with st.spinner("🗣️ Sintetizando voz pastoral..."):
                 try:
-                    # 1. Limpiamos el texto de asteriscos de Markdown
-                    texto_limpio = texto_completo.replace("*", "").replace("#", "")                    
-                    # 2. Generamos el audio directamente en la memoria RAM
-                    tts = gTTS(text=texto_limpio, lang='es', tld='com.mx')
-                    audio_bytes = io.BytesIO()
-                    tts.write_to_fp(audio_bytes)
-                    audio_bytes.seek(0) # Rebobinamos la cinta de audio
+                    # 1. Limpiamos el texto de asteriscos y símbolos extraños
+                    texto_limpio = texto_completo.replace("*", "").replace("#", "")
                     
-                    # 3. Desplegamos el reproductor en la interfaz
+                    # 2. Generamos el audio neuronal hiperrealista (Voz: Onyx)
+                    respuesta_audio = cliente_openai.audio.speech.create(
+                        model="tts-1",
+                        voice="onyx",
+                        input=texto_limpio
+                    )
+                    
+                    # 3. Convertimos la respuesta a bytes para Streamlit
+                    import io
+                    audio_bytes = io.BytesIO(respuesta_audio.content)
+                    audio_bytes.seek(0)
+                    
+                    # 4. Desplegamos el reproductor
                     st.audio(audio_bytes, format='audio/mp3')
+                    
                 except Exception as e:
-                    st.error(f"Error en las cuerdas vocales de la IA: {e}")
+                    st.error(f"Error en las cuerdas vocales: {e}")
 
             # 4. Guardar la nueva conversación en la Memoria Permanente
-            texto_a_guardar = f"Usuario: {prompt} | Evangelista: {respuesta.text[:500]}..."
+            texto_a_#guardar = ---f"
+            Usuario: {prompt} | Evangelista: {respuesta.text[:500]}..."
             vector_a_guardar = obtener_vector(texto_a_guardar)
             id_unico = str(int(time.time())) # Genera un ID basado en la hora actual
             

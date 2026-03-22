@@ -1,7 +1,7 @@
 streamlit
 google-generativeai
 pinecone
-gTTS
+openai
 langdetect
 PyPDF2
 Pillow
