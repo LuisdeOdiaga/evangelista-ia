@@ -239,9 +239,13 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
                 respuesta = chat.send_message(prompt_enriquecido)
             
             # --- IMPRESIÓN EN PANTALLA (Efecto Telepatía) ---
+            import time
             def generador_texto():
                 for pedazo in respuesta:
-                    yield pedazo.text
+                    # Desarmamos el bloque en palabras y las imprimimos una por una
+                    for palabra in pedazo.text.split(" "):
+                        yield palabra + " "
+                        time.sleep(0.04) # ⏱️ El latido: 40 milisegundos de pausa visual
             
             texto_completo = st.write_stream(generador_texto())
             st.session_state.messages.append({"role": "assistant", "content": texto_completo})
