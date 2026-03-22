@@ -99,28 +99,45 @@ if "rol" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# --- Evangelización Mundial (Control de Acceso de Dos Niveles) ---
+# ==========================================
+# EVANGELIZACION MUNDIAL
+# ==========================================
+
+# 1. Inicialización de Memoria de Sesión
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
+if "rol" not in st.session_state:
+    st.session_state.rol = None
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# 2. Pantalla de Login (Si no está autenticado)
 if not st.session_state.autenticado:
-     st.markdown("### 🔐 Acceso al Búnker Teológico")
-     usuario = st.text_input("👤 Usuario")
-     clave = st.text_input("🔑 Contraseña", type="password")
-if st.button("Entrar"):
-     admin_u = os.getenv("ADMIN_USER", "admin")
-     admin_p = os.getenv("ADMIN_PASS", "admin")
-     guest_u = os.getenv("GUEST_USER", "invitado")
-     guest_p = os.getenv("GUEST_PASS", "1234")
-if usuario == admin_u and clave == admin_p:
-     st.session_state.autenticado = True
-     st.session_state.rol = "admin"
-     st.rerun()
-elif usuario == guest_u and clave == guest_p:
-     st.session_state.autenticado = True
-     st.session_state.rol = "invitado"
-     st.rerun()
-else:
-     st.error("🚨 Credenciales incorrectas.")
-     st.stop()
-# -------------------------------------------------------
+    st.markdown("### 🔐 Acceso al Búnker Teológico")
+    
+    # Entradas de datos (Fuera del botón para que no se borren)
+    usuario_ingresado = st.text_input("👤 Usuario")
+    clave_ingresada = st.text_input("🔑 Contraseña", type="password")
+    
+    # Definición de llaves maestras
+    admin_u = os.getenv("ADMIN_USER", "admin")
+    admin_p = os.getenv("ADMIN_PASS", "admin")
+    guest_u = os.getenv("GUEST_USER", "invitado")
+    guest_p = os.getenv("GUEST_PASS", "1234")
+
+    if st.button("Entrar"):
+        if usuario_ingresado == admin_u and clave_ingresada == admin_p:
+            st.session_state.autenticado = True
+            st.session_state.rol = "admin"
+            st.rerun()
+        elif usuario_ingresado == guest_u and clave_ingresada == guest_p:
+            st.session_state.autenticado = True
+            st.session_state.rol = "invitado"
+            st.rerun()
+        else:
+            st.error("🚨 Credenciales incorrectas.")
+    
+    st.stop() # Detiene la ejecución aquí si no hay login exitoso
 
 # Seguridad: Leer llaves desde Render
 api_key_google = os.getenv("GOOGLE_API_KEY")
