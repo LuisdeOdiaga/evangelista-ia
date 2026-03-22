@@ -90,28 +90,28 @@ st.markdown("""
 # ---------------------------------------------------
 
 # --- Evangelización Mundial (Control de Acceso de Dos Niveles) ---
-       if not st.session_state.autenticado:
-              st.markdown("### 🔐 Acceso al Búnker Teológico")
-              usuario = st.text_input("👤 Usuario")
-              clave = st.text_input("🔑 Contraseña", type="password")
+if not st.session_state.autenticado:
+       st.markdown("### 🔐 Acceso al Búnker Teológico")
+       usuario = st.text_input("👤 Usuario")
+       clave = st.text_input("🔑 Contraseña", type="password")
     
-        if st.button("Entrar"):
-           admin_u = os.getenv("ADMIN_USER", "admin")
-           admin_p = os.getenv("ADMIN_PASS", "admin")
-           guest_u = os.getenv("GUEST_USER", "invitado")
-           guest_p = os.getenv("GUEST_PASS", "1234")
+if st.button("Entrar"):
+     admin_u = os.getenv("ADMIN_USER", "admin")
+     admin_p = os.getenv("ADMIN_PASS", "admin")
+     guest_u = os.getenv("GUEST_USER", "invitado")
+     guest_p = os.getenv("GUEST_PASS", "1234")
         
-        if usuario == admin_u and clave == admin_p:
-            st.session_state.autenticado = True
-            st.session_state.rol = "admin"
-            st.rerun()
-        elif usuario == guest_u and clave == guest_p:
-            st.session_state.autenticado = True
-            st.session_state.rol = "invitado"
-            st.rerun()
-        else:
-            st.error("🚨 Credenciales incorrectas.")
-    st.stop()
+if usuario == admin_u and clave == admin_p:
+     st.session_state.autenticado = True
+     st.session_state.rol = "admin"
+     st.rerun()
+elif usuario == guest_u and clave == guest_p:
+     st.session_state.autenticado = True
+     st.session_state.rol = "invitado"
+     st.rerun()
+ else:
+     st.error("🚨 Credenciales incorrectas.")
+     st.stop()
 # -------------------------------------------------------
 
 # Seguridad: Leer llaves desde Render
