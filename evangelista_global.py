@@ -153,14 +153,14 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-    st.markdown(message["content"])
+st.markdown(message["content"])
 
 ## --- ---MOTOR VISUAL ---
 # --- PANEL LATERAL EXCLUSIVO PARA EL ARQUITECTO ---
 if st.session_state.rol == "admin":
     with st.sidebar:
-    st.header("📚 Ingesta Teológica")
-    archivo_pdf = st.file_uploader("Sube un libro o documento doctrinal (PDF)", type=["pdf"])
+st.header("📚 Ingesta Teológica")
+archivo_pdf = st.file_uploader("Sube un libro o documento doctrinal (PDF)", type=["pdf"])
         
 if archivo_pdf is not None:
 if st.button("🧠 Memorizar Documento"):
