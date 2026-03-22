@@ -257,7 +257,7 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
             with st.spinner("🗣️ Sintetizando voz pastoral..."):
                 try:
                     # 1. Limpiamos el texto de asteriscos y símbolos extraños
-                    texto_limpio = texto_completo.replace("*", "").replace("#", "")
+                    texto_limpio = texto_completo.replace("*", "").replace("#", "")[:4000]
                     
                     # 2. Generamos el audio neuronal hiperrealista (Voz: Onyx)
                     respuesta_audio = cliente_openai.audio.speech.create(
