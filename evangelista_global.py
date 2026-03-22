@@ -151,8 +151,7 @@ def obtener_vector(texto):
 # Memoria de pantalla (Streamlit)
 if "messages" not in st.session_state:
     st.session_state.messages = []
-for message in
-st.session_state.messages:
+for message in st.session_state.messages:
     st.chat_message(message["role"]).markdown(message["content"])
 
 ## --- ---MOTOR VISUAL ---
