@@ -121,8 +121,8 @@ if not st.session_state.autenticado:
 api_key_google = os.getenv("GOOGLE_API_KEY")
 api_key_pinecone = os.getenv("PINECONE_API_KEY")
 
-if not api_key_google or not api_key_pinecone or not api_key_openai:
-    st.error("⚠️ Faltan las llaves (API Keys) en Render. Revisa Google, Pinecone u OpenAI.")
+if not api_key_google or not api_key_pinecone:
+    st.error("⚠️ Faltan las llaves (API Keys) en Render. Revisa Google o Pinecone.")
     st.stop()
 
 # Conectar Motores
@@ -154,9 +154,6 @@ def obtener_vector(texto):
     )
     return resultado['embedding']
 
-# Memoria de pantalla (Streamlit)
-#if "---messages" not in st.session_state:
-    st.session_state.messages = []
 # Memoria de pantalla (Streamlit)
 if "messages" not in st.session_state:
     st.session_state.messages = []
