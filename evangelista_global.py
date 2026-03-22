@@ -278,9 +278,8 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
                 except Exception as e:
                     st.error(f"Error en las cuerdas vocales: {e}")
 
-            # 4. Guardar la nueva conversación en la Memoria Permanente
-            texto_a_#guardar = ---f"
-            Usuario: {prompt} | Evangelista: {respuesta.text[:500]}..."
+            # 4. Guardar la nueva conversacion en la Memoria
+            texto_a_guardar = f"Usuario: {prompt} | Evangelista: {texto_completo[:500]}..."
             vector_a_guardar = obtener_vector(texto_a_guardar)
             id_unico = str(int(time.time())) # Genera un ID basado en la hora actual
             
