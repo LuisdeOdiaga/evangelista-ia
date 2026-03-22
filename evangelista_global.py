@@ -198,7 +198,7 @@ with st.sidebar:
                 st.success(f"¡Libro asimilado! {len(fragmentos)} fragmentos guardados en la memoria inmortal.")
 # --- MOTOR VISUAL ---
     st.markdown("---")
-    st.header("👁️ Visión Teológica")
+    st.header("🧐 Visión Teológica")
     archivo_imagen = st.file_uploader("Sube una imagen (Papiro, texto, pintura)", type=["jpg", "png", "jpeg"])
 # ---------------------------------------------------
 if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
@@ -238,16 +238,19 @@ if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
             else:
                 respuesta = chat.send_message(prompt_enriquecido)
             
-            # --- IMPRESIÓN EN PANTALLA ---
-            st.markdown(respuesta.text)
-            st.session_state.messages.append({"role": "assistant", "content": respuesta.text})
+            # --- IMPRESIÓN EN PANTALLA (Efecto Telepatía) ---
+            def generador_texto():
+                for pedazo in respuesta:
+                    yield pedazo.text
+            
+            texto_completo = st.write_stream(generador_texto())
+            st.session_state.messages.append({"role": "assistant", "content": texto_completo})
             
             # --- MOTOR DE VOZ (Sintetizador neuronal) ---
             with st.spinner("🎙️ Sintetizando sermón en audio..."):
                 try:
                     # 1. Limpiamos el texto de asteriscos de Markdown
-                    texto_limpio = respuesta.text.replace("*", "").replace("#", "")
-                    
+                    texto_limpio = texto_completo.replace("*", "").replace("#", "")                    
                     # 2. Generamos el audio directamente en la memoria RAM
                     tts = gTTS(text=texto_limpio, lang='es', tld='com.mx')
                     audio_bytes = io.BytesIO()
