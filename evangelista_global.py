@@ -89,6 +89,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 # ---------------------------------------------------
 
+# --- INICIALIZACIÓN DEL SISTEMA DE SEGURIDAD ---
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
+
+if "rol" not in st.session_state:
+    st.session_state.rol = None
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
 # --- Evangelización Mundial (Control de Acceso de Dos Niveles) ---
 if not st.session_state.autenticado:
      st.markdown("### 🔐 Acceso al Búnker Teológico")
