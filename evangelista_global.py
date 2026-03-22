@@ -151,7 +151,6 @@ def obtener_vector(texto):
 # Memoria de pantalla (Streamlit)
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
     st.markdown(message["content"])
@@ -169,14 +168,14 @@ if st.button("🧠 Memorizar Documento"):
 # 1. Extraer texto del PDF
     lector = PyPDF2.PdfReader(archivo_pdf)
     texto_completo = ""
-    for pagina in lector.pages:
+for pagina in lector.pages:
     texto_completo += pagina.extract_text()
                     
 # 2. Fragmentación (Chunking)
     fragmentos = [texto_completo[i:i+1000] for i in range(0, len(texto_completo), 1000)]
                     
 # 3. Vectorización y Subida a Pinecone
-    for i, fragmento in enumerate(fragmentos):
+for i, fragmento in enumerate(fragmentos):
     vector = obtener_vector(fragmento)
     import time
     time.sleep(3) # Pausa para no saturar Gemini
@@ -193,7 +192,7 @@ if st.button("🧠 Memorizar Documento"):
 if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-    st.markdown(prompt)
+st.markdown(prompt)
 
     with st.chat_message("assistant"):
         try:
