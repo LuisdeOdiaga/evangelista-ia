@@ -3,7 +3,6 @@ import google.generativeai as genai
 from pinecone import Pinecone
 import os
 import time
-from gtts import gTTS
 import io
 import base64
 import PyPDF2  # <--- ¡ESTA ES LA LLAVE MAESTRA QUE FALTA!
