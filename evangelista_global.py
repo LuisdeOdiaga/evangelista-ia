@@ -90,6 +90,34 @@ st.markdown("""
 """, unsafe_allow_html=True)
 # ---------------------------------------------------
 
+# --- BÚNKER DE SEGURIDAD (Login Multi-Usuario) ---
+# 1. Verificamos si el usuario ya está autenticado en esta sesión
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
+
+# 2. Si NO está autenticado, le mostramos la puerta blindada
+if not st.session_state.autenticado:
+    st.markdown("<h1 style='text-align: center; color: #a78bfa;'>🛡️ Búnker de Seguridad</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Acceso clasificado. Identifícate para entrar a la Matrix.</p>", unsafe_allow_html=True)
+    
+    with st.form("login_form"):
+        usuario = st.text_input("Usuario")
+        contrasena = st.text_input("Contraseña", type="password")
+        boton_acceso = st.form_submit_button("Ingresar")
+        
+        if boton_acceso:
+            # Aquí defines quién tiene la llave maestra
+            if usuario == "Arquitecto" and contrasena == "Apologetica2026":
+                st.session_state.autenticado = True
+                st.rerun() # Reinicia la app para dejarlo pasar
+            else:
+                st.error("🚨 Acceso denegado. Credenciales incorrectas.")
+    
+    # LA MURALLA ABSOLUTA: Si no está autenticado, detenemos TODA la ejecución aquí.
+    # El servidor no leerá Pinecone, ni Gemini, ni mostrará el chat.
+    st.stop()
+# -------------------------------------------------
+
 # Seguridad: Leer llaves desde Render
 api_key_google = os.getenv("GOOGLE_API_KEY")
 api_key_pinecone = os.getenv("PINECONE_API_KEY")
