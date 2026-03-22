@@ -89,32 +89,34 @@ st.markdown("""
 """, unsafe_allow_html=True)
 # ---------------------------------------------------
 
-# --- BÚNKER DE SEGURIDAD (Login Multi-Usuario) ---
-# 1. Verificamos si el usuario ya está autenticado en esta sesión
+# --- Evangelización Mundial (Control de Acceso de Dos Niveles) ---
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
+    st.session_state.rol = None
 
-# 2. Si NO está autenticado, le mostramos la puerta blindada
 if not st.session_state.autenticado:
-    st.markdown("<h1 style='text-align: center; color: #a78bfa;'>🛡️ Búnker de Seguridad</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'>Acceso clasificado. Identifícate para entrar a la Matrix.</p>", unsafe_allow_html=True)
+    st.markdown("### 🔐 Acceso al Búnker Teológico")
+    usuario = st.text_input("👤 Usuario")
+    clave = st.text_input("🔑 Contraseña", type="password")
     
-    with st.form("login_form"):
-        usuario = st.text_input("Usuario")
-        contrasena = st.text_input("Contraseña", type="password")
-        boton_acceso = st.form_submit_button("Ingresar")
-        
-        if boton_acceso:
-            # Aquí defines quién tiene la llave maestra
-            if usuario == "Arquitecto" and contrasena == "Apologetica2026":
-                st.session_state.autenticado = True
-                st.rerun() # Reinicia la app para dejarlo pasar
-            else:
-                st.error("🚨 Acceso denegado. Credenciales incorrectas.")
-    
-    # LA MURALLA ABSOLUTA: Si no está autenticado, detenemos TODA la ejecución aquí.
-    # El servidor no leerá Pinecone, ni Gemini, ni mostrará el chat.
-    st.stop()
+if st.button("Entrar"):
+# Leer credenciales desde Render
+admin_u = os.getenv("ADMIN_USER", "admin")
+admin_p = os.getenv("ADMIN_PASS", "admin")
+guest_u = os.getenv("GUEST_USER", "invitado")
+guest_p = os.getenv("GUEST_PASS", "1234")
+       
+if usuario == admin_u and clave == admin_p:
+   st.session_state.autenticado = True
+   st.session_state.rol = "admin" # <-- Te da poderes de Arquitecto
+   st.rerun()
+elif usuario == guest_u and clave == guest_p:
+     st.session_state.autenticado = True
+     st.session_state.rol = "invitado" # <-- Acceso solo como Discípulo
+     st.rerun()
+else:
+    st.error("🚨 Credenciales incorrectas.")
+    st.stop() # La Muralla: Nadie pasa de aquí sin llave
 # -------------------------------------------------
 
 # Seguridad: Leer llaves desde Render
@@ -162,38 +164,37 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Cuando el usuario escribe...
-# --- PANEL LATERAL: INGESTA DE CONOCIMIENTO (PDF) ---
-with st.sidebar:
-    st.header("📚 Ingesta Teológica")
-    archivo_pdf = st.file_uploader("Sube un libro o documento PDF", type="pdf")
-    
-    if archivo_pdf is not None:
-        if st.button("🧠 Memorizar Documento"):
-            with st.spinner("Devorando y vectorizando libro..."):
-                # 1. Extraer texto del PDF
-                lector = PyPDF2.PdfReader(archivo_pdf)
-                texto_completo = ""
-                for pagina in lector.pages:
-                    texto_completo += pagina.extract_text() + "\n"
-                
-                # 2. Fragmentación (Chunking) - Pedazos de 1000 caracteres
-                fragmentos = [texto_completo[i:i+1000] for i in range(0, len(texto_completo), 1000)]
-                
-                # 3. Vectorización y Subida a Pinecone
-                for i, fragmento in enumerate(fragmentos):
-                    vector = obtener_vector(fragmento) # Usamos tu función existente
-                    time.sleep(3)
-                    id_unico = f"doc_{archivo_pdf.name}_{i}"
-                    index.upsert(vectors=[{
-                        "id": id_unico,
-                        "values": vector,
-                        "metadata": {"texto": fragmento, "origen": archivo_pdf.name}
-                    }])
-                
-                st.success(f"¡Libro asimilado! {len(fragmentos)} fragmentos guardados en la memoria inmortal.")
-# --- MOTOR VISUAL ---
-    st.markdown("---")
+## --- ---MOTOR VISUAL ---
+# --- PANEL LATERAL EXCLUSIVO PARA EL ARQUITECTO ---
+if st.session_state.rol == "admin":
+    with st.sidebar:
+        st.header("📚 Ingesta Teológica")
+        archivo_pdf = st.file_uploader("Sube un libro o documento doctrinal (PDF)", type=["pdf"])
+        
+        if archivo_pdf is not None:
+            if st.button("🧠 Memorizar Documento"):
+                with st.spinner("Devorando y vectorizando libro..."):
+                    # 1. Extraer texto del PDF
+                    lector = PyPDF2.PdfReader(archivo_pdf)
+                    texto_completo = ""
+                    for pagina in lector.pages:
+                        texto_completo += pagina.extract_text()
+                    
+                    # 2. Fragmentación (Chunking)
+                    fragmentos = [texto_completo[i:i+1000] for i in range(0, len(texto_completo), 1000)]
+                    
+                    # 3. Vectorización y Subida a Pinecone
+                    for i, fragmento in enumerate(fragmentos):
+                        vector = obtener_vector(fragmento)
+                        import time
+                        time.sleep(3) # Pausa para no saturar Gemini
+                        id_unico = f"doc_{archivo_pdf.name}_{i}"
+                        index.upsert(vectors=[{
+                            "id": id_unico,
+                            "values": vector,
+                            "metadata": {"texto": fragmento}
+                        }])
+                    st.success("✅ ¡Documento inyectado en la memoria profunda!")
     st.header("🧐 Visión Teológica")
     archivo_imagen = st.file_uploader("Sube una imagen (Papiro, texto, pintura)", type=["jpg", "png", "jpeg"])
 # ---------------------------------------------------
