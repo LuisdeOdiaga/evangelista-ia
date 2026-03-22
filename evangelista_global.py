@@ -91,16 +91,14 @@ st.markdown("""
 
 # --- Evangelización Mundial (Control de Acceso de Dos Niveles) ---
 if not st.session_state.autenticado:
-       st.markdown("### 🔐 Acceso al Búnker Teológico")
-       usuario = st.text_input("👤 Usuario")
-       clave = st.text_input("🔑 Contraseña", type="password")
-    
+     st.markdown("### 🔐 Acceso al Búnker Teológico")
+     usuario = st.text_input("👤 Usuario")
+     clave = st.text_input("🔑 Contraseña", type="password")
 if st.button("Entrar"):
      admin_u = os.getenv("ADMIN_USER", "admin")
      admin_p = os.getenv("ADMIN_PASS", "admin")
      guest_u = os.getenv("GUEST_USER", "invitado")
      guest_p = os.getenv("GUEST_PASS", "1234")
-        
 if usuario == admin_u and clave == admin_p:
      st.session_state.autenticado = True
      st.session_state.rol = "admin"
@@ -109,7 +107,7 @@ elif usuario == guest_u and clave == guest_p:
      st.session_state.autenticado = True
      st.session_state.rol = "invitado"
      st.rerun()
- else:
+else:
      st.error("🚨 Credenciales incorrectas.")
      st.stop()
 # -------------------------------------------------------
@@ -137,10 +135,10 @@ Tus directrices irrompibles son:
 4. Fidelidad: Mantén un tono majestuoso, pastoral, profundo y estrictamente fiel a la Palabra de Dios.
 5. Apologética de Alto Nivel: Frente a argumentos ateos, escépticos o ataques a la fe, no respondas con religiosidad vacía. Desmonta las falacias lógicas con rigor filosófico, evidencia histórica y textual (1 Pedro 3:15), demostrando la superioridad de la cosmovisión bíblica y llevando el debate de vuelta a la cruz."""
 
-model = genai.GenerativeModel(
+    model = genai.GenerativeModel(
     model_name='gemini-2.5-flash',
     system_instruction=SISTEMA_ADN,
-)
+    )
 
 # Función para traducir texto a Matemáticas (Vectores de 768 dimensiones)
 def obtener_vector(texto):
@@ -157,146 +155,146 @@ if "messages" not in st.session_state:
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    st.markdown(message["content"])
 
 ## --- ---MOTOR VISUAL ---
 # --- PANEL LATERAL EXCLUSIVO PARA EL ARQUITECTO ---
 if st.session_state.rol == "admin":
     with st.sidebar:
-        st.header("📚 Ingesta Teológica")
-        archivo_pdf = st.file_uploader("Sube un libro o documento doctrinal (PDF)", type=["pdf"])
+    st.header("📚 Ingesta Teológica")
+    archivo_pdf = st.file_uploader("Sube un libro o documento doctrinal (PDF)", type=["pdf"])
         
-        if archivo_pdf is not None:
-            if st.button("🧠 Memorizar Documento"):
-                with st.spinner("Devorando y vectorizando libro..."):
-                    # 1. Extraer texto del PDF
-                    lector = PyPDF2.PdfReader(archivo_pdf)
-                    texto_completo = ""
-                    for pagina in lector.pages:
-                        texto_completo += pagina.extract_text()
+if archivo_pdf is not None:
+if st.button("🧠 Memorizar Documento"):
+    with st.spinner("Devorando y vectorizando libro..."):
+# 1. Extraer texto del PDF
+    lector = PyPDF2.PdfReader(archivo_pdf)
+    texto_completo = ""
+    for pagina in lector.pages:
+    texto_completo += pagina.extract_text()
                     
-                    # 2. Fragmentación (Chunking)
-                    fragmentos = [texto_completo[i:i+1000] for i in range(0, len(texto_completo), 1000)]
+# 2. Fragmentación (Chunking)
+    fragmentos = [texto_completo[i:i+1000] for i in range(0, len(texto_completo), 1000)]
                     
-                    # 3. Vectorización y Subida a Pinecone
-                    for i, fragmento in enumerate(fragmentos):
-                        vector = obtener_vector(fragmento)
-                        import time
-                        time.sleep(3) # Pausa para no saturar Gemini
-                        id_unico = f"doc_{archivo_pdf.name}_{i}"
-                        index.upsert(vectors=[{
-                            "id": id_unico,
-                            "values": vector,
-                            "metadata": {"texto": fragmento}
-                        }])
-                    st.success("✅ ¡Documento inyectado en la memoria profunda!")
+# 3. Vectorización y Subida a Pinecone
+    for i, fragmento in enumerate(fragmentos):
+    vector = obtener_vector(fragmento)
+    import time
+    time.sleep(3) # Pausa para no saturar Gemini
+    id_unico = f"doc_{archivo_pdf.name}_{i}"
+    index.upsert(vectors=[{
+    "id": id_unico,
+    "values": vector,
+    "metadata": {"texto": fragmento}
+                }])
+    st.success("✅ ¡Documento inyectado en la memoria profunda!")
     st.header("🧐 Visión Teológica")
     archivo_imagen = st.file_uploader("Sube una imagen (Papiro, texto, pintura)", type=["jpg", "png", "jpeg"])
 # ---------------------------------------------------
 if prompt := st.chat_input("Escribe tu duda teológica profunda..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.markdown(prompt)
+    st.markdown(prompt)
 
     with st.chat_message("assistant"):
         try:
-            # 1. Buscar recuerdos pasados en Pinecone
-            vector_pregunta = obtener_vector(prompt)
-            recuerdos = index.query(vector=vector_pregunta, top_k=2, include_metadata=True)
+# 1. Buscar recuerdos pasados en Pinecone
+    vector_pregunta = obtener_vector(prompt)
+    recuerdos = index.query(vector=vector_pregunta, top_k=2, include_metadata=True)
             
-            contexto = ""
-            if recuerdos['matches']:
-                contexto = "RECUERDOS DE CONVERSACIONES PASADAS (Usa esto para dar contexto si es útil):\n"
-                for match in recuerdos['matches']:
-                    if 'texto' in match['metadata']:
-                        contexto += f"- {match['metadata']['texto']}\n"
+    contexto = ""
+if recuerdos['matches']:
+    contexto = "RECUERDOS DE CONVERSACIONES PASADAS (Usa esto para dar contexto si es útil):\n"
+    for match in recuerdos['matches']:
+if 'texto' in match['metadata']:
+    contexto += f"- {match['metadata']['texto']}\n"
 
-            # 2. Mezclar pregunta actual con recuerdos
-            prompt_enriquecido = prompt
-            if contexto:
-                prompt_enriquecido = f"{contexto}\n\nPREGUNTA ACTUAL DEL USUARIO:\n{prompt}"
+# 2. Mezclar pregunta actual con recuerdos
+    prompt_enriquecido = prompt
+if contexto:
+    prompt_enriquecido = f"{contexto}\n\nPREGUNTA ACTUAL DEL USUARIO:\n{prompt}"
 
-            # 3. Hablar con Gemini
-            # --- PROTECCIÓN DE MEMORIA (Ventana Deslizante) ---
-            mensajes_recientes = st.session_state.messages[-10:]
-            historial = [{"role": "user" if m["role"] == "user" else "model", "parts": m["content"]} for m in mensajes_recientes]
-            chat = model.start_chat(history=historial)
-            # --------------------------------------------------
-            # Lógica de Visión Multimodal
-            if archivo_imagen is not None:
-                from PIL import Image
-                imagen_abierta = Image.open(archivo_imagen)
-                respuesta = chat.send_message([prompt_enriquecido, imagen_abierta])
-            else:
-                respuesta = chat.send_message(prompt_enriquecido)
+# 3. Hablar con Gemini
+# --- PROTECCIÓN DE MEMORIA (Ventana Deslizante) ---
+    mensajes_recientes = st.session_state.messages[-10:]
+    historial = [{"role": "user" if m["role"] == "user" else "model", "parts": m["content"]} for m in mensajes_recientes]
+    chat = model.start_chat(history=historial)
+# --------------------------------------------------
+# Lógica de Visión Multimodal
+if archivo_imagen is not None:
+    from PIL import Image
+    imagen_abierta = Image.open(archivo_imagen)
+    respuesta = chat.send_message([prompt_enriquecido, imagen_abierta])
+    else:
+    respuesta = chat.send_message(prompt_enriquecido)
             
-            # --- IMPRESIÓN EN PANTALLA (Efecto Telepatía) ---
-            import time
-            def generador_texto():
-                for pedazo in respuesta:
-                    # Desarmamos el bloque en palabras y las imprimimos una por una
-                    for palabra in pedazo.text.split(" "):
-                        yield palabra + " "
-                        time.sleep(0.04) # ⏱️ El latido: 40 milisegundos de pausa visual
+# --- IMPRESIÓN EN PANTALLA (Efecto Telepatía) ---
+    import time
+    def generador_texto():
+    for pedazo in respuesta:
+# Desarmamos el bloque en palabras y las imprimimos una por una
+    for palabra in pedazo.text.split(" "):
+    yield palabra + " "
+    time.sleep(0.04) # ⏱️ El latido: 40 milisegundos de pausa visual
             
-            texto_completo = st.write_stream(generador_texto())
-            st.session_state.messages.append({"role": "assistant", "content": texto_completo})
+    texto_completo = st.write_stream(generador_texto())
+    st.session_state.messages.append({"role": "assistant", "content": texto_completo})
             
-            # --- MOTOR DE VOZ (Edge TTS - Microsoft Neuronal Sin Limites) ---
-            with st.spinner("🗣️ Sintetizando el sermón completo..."):
-                try:
-                    # 1. Limpiamos el texto de asteriscos (Sin límites de corte)
-                    texto_limpio = texto_completo.replace("*", "").replace("#", "")
+# --- MOTOR DE VOZ (Edge TTS - Microsoft Neuronal Sin Limites) ---
+    with st.spinner("🗣️ Sintetizando el sermón completo..."):
+    try:
+# 1. Limpiamos el texto de asteriscos (Sin límites de corte)
+    texto_limpio = texto_completo.replace("*", "").replace("#", "")
                     
-                    import edge_tts
-                    import asyncio
-                    import io
+    import edge_tts
+    import asyncio
+    import io
                     
-                    # 2. Creamos la función asíncrona para descargar el audio completo
-                    async def crear_audio_memoria():
-                        # Usamos la voz de Jorge (Voz neuronal profunda y clara)
-                        comunicador = edge_tts.Communicate(texto_limpio, "es-MX-JorgeNeural")
-                        audio_data = b""
-                        async for chunk in comunicador.stream():
-                            if chunk["type"] == "audio":
-                                audio_data += chunk["data"]
-                        return audio_data
+# 2. Creamos la función asíncrona para descargar el audio completo
+    async def crear_audio_memoria():
+# Usamos la voz de Jorge (Voz neuronal profunda y clara)
+    comunicador = edge_tts.Communicate(texto_limpio, "es-MX-JorgeNeural")
+    audio_data = b""
+    async for chunk in comunicador.stream():
+if chunk["type"] == "audio":
+    audio_data += chunk["data"]
+    return audio_data
                     
-                    # 3. Ejecutamos el motor y guardamos en memoria
-                    bytes_completos = asyncio.run(crear_audio_memoria())
+# 3. Ejecutamos el motor y guardamos en memoria
+    bytes_completos = asyncio.run(crear_audio_memoria())
                     
-                    # 4. Desplegamos el reproductor con el mensaje INTACTO
-                    audio_bytes = io.BytesIO(bytes_completos)
-                    st.audio(audio_bytes, format='audio/mp3')
+# 4. Desplegamos el reproductor con el mensaje INTACTO
+    audio_bytes = io.BytesIO(bytes_completos)
+    st.audio(audio_bytes, format='audio/mp3')
                     
-                except Exception as e:
-                    st.error(f"Error en las cuerdas vocales: {e}")
+    except Exception as e:
+    st.error(f"Error en las cuerdas vocales: {e}")
 
-            # 4. Guardar la nueva conversacion en la Memoria
-            texto_a_guardar = f"Usuario: {prompt} | Evangelista: {texto_completo[:500]}..."
-            vector_a_guardar = obtener_vector(texto_a_guardar)
-            id_unico = str(int(time.time())) # Genera un ID basado en la hora actual
+# 4. Guardar la nueva conversacion en la Memoria
+    texto_a_guardar = f"Usuario: {prompt} | Evangelista: {texto_completo[:500]}..."
+    vector_a_guardar = obtener_vector(texto_a_guardar)
+    id_unico = str(int(time.time())) # Genera un ID basado en la hora actual
             
-            index.upsert(vectors=[{
-                "id": id_unico,
-                "values": vector_a_guardar,
-                "metadata": {"texto": texto_a_guardar}
-            }])
+    index.upsert(vectors=[{
+    "id": id_unico,
+    "values": vector_a_guardar,
+    "metadata": {"texto": texto_a_guardar}
+                 }])
 
-        except Exception as e:
-            st.error(f"Error en los sistemas: {e}")
+    except Exception as e:
+    st.error(f"Error en los sistemas: {e}")
 
-            # --- MOTOR DE EXPORTACIÓN (Impresora de Sermones) ---
-            st.markdown("---")
-            # 1. Preparamos el documento con un encabezado profesional
-            documento_final = f"=== ESTUDIO BÍBLICO: EVANGELISTA IA ===\n\nPREGUNTA DEL USUARIO:\n{prompt}\n\nRESPUESTA TEOLÓGICA:\n{respuesta.text}\n\n======================================="
+# --- MOTOR DE EXPORTACIÓN (Impresora de Sermones) ---
+    st.markdown("---")
+# 1. Preparamos el documento con un encabezado profesional
+    documento_final = f"=== ESTUDIO BÍBLICO: EVANGELISTA IA ===\n\nPREGUNTA DEL USUARIO:\n{prompt}\n\nRESPUESTA TEOLÓGICA:\n{respuesta.text}\n\n======================================="
             
-            # 2. Generamos el botón de descarga nativo
-            st.download_button(
-                label="📥 Descargar Estudio Bíblico",
-                data=documento_final,
-                file_name="sermon_evangelista.txt",
-                mime="text/plain"
+# 2. Generamos el botón de descarga nativo
+    st.download_button(
+    label="📥 Descargar Estudio Bíblico",
+    data=documento_final,
+    file_name="sermon_evangelista.txt",
+    mime="text/plain"
             )
-            # ----------------------------------------------------
+# ----------------------------------------------------
 
