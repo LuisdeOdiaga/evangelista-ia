@@ -183,88 +183,73 @@ for message in st.session_state.messages:
 
 # ## --- MOTOR VISUAL ---
 
-# 1. PANEL LATERAL (Solo para el Arquitecto)
-if st.session_state.rol == "admin":
-    with st.sidebar:
-        st.header("📚 Ingesta Teológica")
-        archivo_pdf = st.file_uploader("Sube un libro", type=["pdf"])
-        if archivo_pdf:
-            if st.button("🧠 Memorizar Documento"):
-                with st.spinner("Procesando..."):
-                    lector = PyPDF2.PdfReader(archivo_pdf)
-                    texto_completo = ""
-                    for pagina in lector.pages:
-                        texto_completo += pagina.extract_text() or ""
-                    fragmentos = [texto_completo[i:i+1000] for i in range(0, len(texto_completo), 1000)]
-                    for i, frag in enumerate(fragmentos):
-                        vec = obtener_vector(frag)
-                        index.upsert(vectors=[{"id": f"d_{i}", "values": vec, "metadata": {"texto": frag}}])
-                    st.success("✅ ¡Memoria actualizada!")
+# 1. PANEL LATERAL (Ingesta para Admin / Visión para Todos)
+with st.sidebar:
+    if st.session_state.rol == "admin":
+        st.header("📚 Ingesta Teológica (Admin)")
+        archivo_pdf = st.file_uploader("Sube un libro (PDF)", type=["pdf"])
+        if archivo_pdf and st.button("🧠 Memorizar"):
+            with st.spinner("Inyectando en Pinecone..."):
+                lector = PyPDF2.PdfReader(archivo_pdf)
+                texto = "".join([p.extract_text() for p in lector.pages])
+                frags = [texto[i:i+1000] for i in range(0, len(texto), 1000)]
+                for i, f in enumerate(frags):
+                    v = obtener_vector(f)
+                    index.upsert(vectors=[{"id":f"p_{i}","values":v,"metadata":{"texto":f}}])
+                st.success("¡Memoria inyectada!")
 
-        st.header("🧐 Visión Teológica")
-        archivo_img = st.file_uploader("Sube imagen", type=["jpg", "png", "jpeg"])
+    st.header("🧐 Visión Teológica (Todos)")
+    archivo_img = st.file_uploader("Sube una imagen para analizar", type=["jpg", "png", "jpeg"])
 
-# 2. CAJA DE CHAT (Para todos los niveles)
-prompt = st.chat_input("Escribe tu duda teológica profunda aquí...")
+# 2. CAJA DE CHAT
+prompt = st.chat_input("Escribe tu duda teológica profunda...")
 
-if prompt:
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+if prompt or archivo_img:
+    # Lógica de procesamiento (Si hay imagen, la analizamos)
+    if prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"): st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # Buscar en Pinecone
-        v_p = obtener_vector(prompt)
+        # 1. Búsqueda de contexto
+        v_p = obtener_vector(prompt if prompt else "Imagen analizada")
         res = index.query(vector=v_p, top_k=2, include_metadata=True)
-        contexto = ""
-        if res['matches']:
-            contexto = "\n".join([m['metadata']['texto'] for m in res['matches']])
+        ctx = "\n".join([m['metadata']['texto'] for m in res['matches']]) if res['matches'] else ""
         
-        prompt_final = f"Contexto: {contexto}\n\nPregunta: {prompt}"
-        
-        # Respuesta de Gemini
+        # 2. Generación de respuesta
         chat = model.start_chat(history=[{"role": m["role"], "parts": [m["content"]]} for m in st.session_state.messages[:-1]])
-        response = chat.send_message(prompt_final)
+        response = chat.send_message(f"Contexto: {ctx}\n\nPregunta: {prompt}")
+        full_res = response.text
         
-        # Efecto Telepatía (Escritura progresiva)
+        # 3. Efecto Telepatía
         placeholder = st.empty()
-        full_res = ""
-        for chunk in response.text.split():
-            full_res += chunk + " "
-            placeholder.markdown(full_res + "▌")
-            time.sleep(0.05)
         placeholder.markdown(full_res)
         st.session_state.messages.append({"role": "assistant", "content": full_res})
-            
-        # --- 🎙️ MOTOR DE VOZ (Jorge) ---
+
+        # 4. Motor de Voz con memoria de sesión
         with st.spinner("🎙️ Jorge está preparando el sermón..."):
-            try:
-                texto_para_voz = full_res.replace("*", "").replace("#", "")
-                import edge_tts
-                import asyncio
-                async def generar_audio():
-                    comunicador = edge_tts.Communicate(texto_para_voz, "es-MX-JorgeNeural")
-                    audio_data = b""
-                    async for chunk in comunicador.stream():
-                        if chunk["type"] == "audio":
-                            audio_data += chunk["data"]
-                    return audio_data
-                audio_final = asyncio.run(generar_audio())
-                st.audio(audio_final, format='audio/mp3')
-            except Exception as e:
-                st.warning("📡 Nota: El audio no está disponible, pero la respuesta es íntegra.")
+            import edge_tts, asyncio
+            async def voz():
+                t = full_res.replace("*","").replace("#","")
+                c = edge_tts.Communicate(t, "es-MX-JorgeNeural", rate="+5%") # Un poco más rápido
+                data = b""
+                async for chunk in c.stream():
+                    if chunk["type"] == "audio": data += chunk["data"]
+                return data
+            st.session_state.audio_data = asyncio.run(voz())
+            st.audio(st.session_state.audio_data, format='audio/mp3')
 
-        # --- 💾 SELLO DE MEMORIA FINAL ---
-        id_memoria = f"mem_{int(time.time())}"
-        vec_memoria = obtener_vector(full_res)
-        index.upsert(vectors=[{"id": id_memoria, "values": vec_memoria, "metadata": {"texto": full_res}}])
-
-        # --- 🖨️ MOTOR DE EXPORTACIÓN (Impresora de Sermones) ---
-        st.markdown("---")
-        doc_texto = f"=== ESTUDIO BÍBLICO: EVANGELISTA IA ===\n\n{full_res}"
+# 3. EXPORTACIÓN (Se mantiene visible si hay audio/texto)
+if "audio_data" in st.session_state:
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.audio(st.session_state.audio_data, format='audio/mp3') # Mantiene el audio vivo
+    with col2:
+        doc_final = f"=== ESTUDIO BÍBLICO: EVANGELISTA IA ===\n\n{st.session_state.messages[-1]['content'] if st.session_state.messages else ''}"
         st.download_button(
-            label="📄 Descargar Sermón como Texto",
-            data=doc_texto,
+            label="📄 Descargar Sermón (Texto Limpio)",
+            data=doc_final.encode('utf-8-sig'), # <--- ESTO ARREGLA LOS JEROGLÍFICOS
             file_name=f"Sermon_{int(time.time())}.txt",
             mime="text/plain"
         )
