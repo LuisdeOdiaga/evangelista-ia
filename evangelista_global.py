@@ -115,7 +115,7 @@ if "messages" not in st.session_state:
 
 # 2. Pantalla de Login (Si no está autenticado)
 if not st.session_state.autenticado:
-    st.markdown("### 🔐 Acceso al Búnker Teológico")
+    st.markdown("### ✝️  Evangelización Mundial")
     
     # Entradas de datos (Fuera del botón para que no se borren)
     usuario_ingresado = st.text_input("👤 Usuario")
@@ -287,11 +287,61 @@ if "audio_data" in st.session_state:
     st.audio(st.session_state.audio_data, format='audio/mp3')
     
     if st.session_state.messages:
-        doc_final = f"=== ESTUDIO BÍBLICO ===\n\n{st.session_state.messages[-1]['content']}"
-        st.download_button(
-            label="📄 Descargar Sermón Proclamado",
-            data=doc_final.encode('utf-8-sig'),
-            file_name=f"Sermon_{int(time.time())}.txt",
-            mime="text/plain"
-        )
+        ultimo_mensaje = st.session_state.messages[-1]['content']
+        
+        # --- MOTOR DE IMPRENTA PDF ---
+        from io import BytesIO
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        
+        def crear_pdf(texto_md):
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
+            styles = getSampleStyleSheet()
+            
+            # 1. Filtro: Las fuentes de PDF no leen emojis, así que los limpiamos
+            texto_limpio = re.sub(r'[^\w\s.,;:\-\'\"?!¿¡()\[\]áéíóúÁÉÍÓÚñÑüÜ]', ' ', texto_md)
+            
+            # 2. Traductor: Convertimos los asteriscos en negritas reales de PDF
+            texto_limpio = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', texto_limpio)
+            texto_limpio = re.sub(r'\*(.*?)\*', r'<i>\1</i>', texto_limpio)
+            
+            story = []
+            story.append(Paragraph("<b>=== ESTUDIO BÍBLICO: EVANGELISTA IA ===</b>", styles["Heading2"]))
+            story.append(Spacer(1, 15))
+            
+            # 3. Moldeado de párrafos
+            for parrafo in texto_limpio.split('\n'):
+                if parrafo.strip():
+                    if parrafo.startswith('#'):
+                        texto_h = parrafo.replace('#', '').strip()
+                        story.append(Paragraph(f"<b>{texto_h}</b>", styles["Heading3"]))
+                    else:
+                        story.append(Paragraph(parrafo, styles["BodyText"]))
+                    story.append(Spacer(1, 10))
+                    
+            doc.build(story)
+            return buffer.getvalue()
+
+        # --- BOTONES DE DESCARGA VISUALES ---
+        st.write("📥 **Opciones de Descarga del Último Sermón:**")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.download_button(
+                label="📄 Descargar en TXT",
+                data=f"=== ESTUDIO BÍBLICO ===\n\n{ultimo_mensaje}".encode('utf-8-sig'),
+                file_name=f"Sermon_{int(time.time())}.txt",
+                mime="text/plain"
+            )
+            
+        with col2:
+            pdf_bytes = crear_pdf(ultimo_mensaje)
+            st.download_button(
+                label="📕 Descargar en PDF",
+                data=pdf_bytes,
+                file_name=f"Sermon_{int(time.time())}.pdf",
+                mime="application/pdf"
+            )
 
