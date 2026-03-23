@@ -191,20 +191,36 @@ with st.sidebar:
         st.header("📚 Ingesta Teológica")
         archivo_pdf = st.file_uploader("Sube un libro (PDF)", type=["pdf"])
         if archivo_pdf and st.button("🧠 Memorizar"):
-            with st.spinner("Inyectando sabiduría..."):
-                lector = PyPDF2.PdfReader(archivo_pdf)
-                texto = "".join([p.extract_text() for p in lector.pages])
-                frags = [texto[i:i+1000] for i in range(0, len(texto), 1000)]
-                for i, f in enumerate(frags):
-                    v = obtener_vector(f)
-                    index.upsert(vectors=[{"id":f"p_{i}","values":v,"metadata":{"texto":f}}])
-                st.success("¡Memoria inyectada!")
+            with st.spinner("Desmenuzando el pergamino..."):
+                try:
+                    lector = PyPDF2.PdfReader(archivo_pdf)
+                    texto = "".join([p.extract_text() for p in lector.pages])
+                    frags = [texto[i:i+1000] for i in range(0, len(texto), 1000)]
+                    
+                    # Barra visual para que veas el avance en tu pantalla
+                    barra_progreso = st.progress(0)
+                    
+                    for i, f in enumerate(frags):
+                        v = obtener_vector(f)
+                        # Agregamos time.time() al ID para que no borre PDFs anteriores
+                        index.upsert(vectors=[{"id":f"doc_{int(time.time())}_{i}","values":v,"metadata":{"texto":f}}])
+                        
+                        # --- LA VÁLVULA DE SEGURIDAD (Tu brillante idea) ---
+                        import time
+                        time.sleep(4) 
+                        
+                        # Actualizamos la barra visual
+                        barra_progreso.progress(min((i + 1) / len(frags), 1.0))
+                        
+                    st.success("¡Memoria inyectada y sellada en Pinecone!")
+                except Exception as e:
+                    st.error(f"🚨 Error en el motor de asimilación: {e}")
 
     st.header("🧐 Visión Teológica")
     archivo_img = st.file_uploader("Analizar imagen sagrada", type=["jpg", "png", "jpeg"])
 
 # ==========================================
-# 2. ZONA DE CHAT (Memoria Visual)
+# 1.2. ZONA DE CHAT (Memoria Visual)
 # ==========================================
 
 # A. Imprimir los mensajes anteriores (¡Para que no desaparezcan!)
