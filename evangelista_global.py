@@ -218,7 +218,14 @@ if prompt or archivo_img:
         ctx = "\n".join([m['metadata']['texto'] for m in res['matches']]) if res['matches'] else ""
         
         # B. Generación con ADN (Forzamos estilo)
-        chat = model.start_chat(history=[{"role": m["role"], "parts": [m["content"]]} for m in st.session_state.messages[:-1]])
+        # --- Traductor de Memoria (Streamlit -> Gemini) ---
+        historial_gemini = []
+        for m in st.session_state.messages[:-1]:
+            rol_gemini = "model" if m["role"] == "assistant" else "user"
+            historial_gemini.append({"role": rol_gemini, "parts": [m["content"]]})
+            
+        chat = model.start_chat(history=historial_gemini)
+        # --------------------------------------------------
         instruccion_estilo = "\n(Responde con encabezados elegantes, usa negritas y un tono solemne de revelación)."
         
         # Lógica de Visión o Texto
