@@ -115,7 +115,7 @@ if "messages" not in st.session_state:
 
 # 2. Pantalla de Login (Si no está autenticado)
 if not st.session_state.autenticado:
-    st.markdown("### ✝️  Evangelización Mundial")
+    st.markdown("### 🌎 Evangelización Mundial")
     
     # Entradas de datos (Fuera del botón para que no se borren)
     usuario_ingresado = st.text_input("👤 Usuario")
@@ -290,6 +290,8 @@ if "audio_data" in st.session_state:
         ultimo_mensaje = st.session_state.messages[-1]['content']
         
         # --- MOTOR DE IMPRENTA PDF ---
+        import re  # <--- ¡LA HERRAMIENTA QUE FALTABA!
+        import time
         from io import BytesIO
         from reportlab.lib.pagesizes import letter
         from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
