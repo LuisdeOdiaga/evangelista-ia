@@ -183,7 +183,7 @@ if "messages" not in st.session_state:
 for message in st.session_state.messages:
     st.chat_message(message["role"]).markdown(message["content"])
 
-#---- MOTOR VISUAL ---
+# ## --- MOTOR VISUAL ---
 
 # 1. PANEL LATERAL (Ingesta y Visión)
 with st.sidebar:
@@ -203,42 +203,51 @@ with st.sidebar:
     st.header("🧐 Visión Teológica")
     archivo_img = st.file_uploader("Analizar imagen sagrada", type=["jpg", "png", "jpeg"])
 
-# 2. CAJA DE CHAT
+# ==========================================
+# 2. ZONA DE CHAT (Memoria Visual)
+# ==========================================
+
+# A. Imprimir los mensajes anteriores (¡Para que no desaparezcan!)
+for mensaje in st.session_state.messages:
+    with st.chat_message(mensaje["role"]):
+        st.markdown(mensaje["content"])
+
+# B. La Caja de Entrada
 prompt = st.chat_input("Escribe tu duda teológica profunda...")
 
 if prompt or archivo_img:
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"): st.markdown(prompt)
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # A. Búsqueda de Contexto
-        v_p = obtener_vector(prompt if prompt else "Imagen analizada")
-        res = index.query(vector=v_p, top_k=2, include_metadata=True)
-        ctx = "\n".join([m['metadata']['texto'] for m in res['matches']]) if res['matches'] else ""
-        
-        # B. Generación con ADN (Forzamos estilo)
-        # --- Traductor de Memoria (Streamlit -> Gemini) ---
+        # --- 1. Traductor de Memoria ---
         historial_gemini = []
         for m in st.session_state.messages[:-1]:
             rol_gemini = "model" if m["role"] == "assistant" else "user"
             historial_gemini.append({"role": rol_gemini, "parts": [m["content"]]})
-            
-        chat = model.start_chat(history=historial_gemini)
-        # --------------------------------------------------
-        instruccion_estilo = "\n(Responde con encabezados elegantes, usa negritas y un tono solemne de revelación)."
         
-        # Lógica de Visión o Texto
+        chat = model.start_chat(history=historial_gemini)
+        
+        # --- 2. Búsqueda y Generación ---
+        v_p = obtener_vector(prompt if prompt else "Imagen analizada")
+        res = index.query(vector=v_p, top_k=2, include_metadata=True)
+        ctx = "\n".join([m['metadata']['texto'] for m in res['matches']]) if res['matches'] else ""
+        
+        instruccion_estilo = "\n(Responde con encabezados elegantes, usa negritas y un tono solemne)."
+        
         if archivo_img:
             from PIL import Image
             img = Image.open(archivo_img)
-            response = model.generate_content([prompt if prompt else "Explica esta imagen teológicamente", img])
+            response = model.generate_content([prompt if prompt else "Explica esta imagen", img])
         else:
             response = chat.send_message(f"Contexto: {ctx}\n\nPregunta: {prompt}{instruccion_estilo}")
         
         full_res = response.text
         
-        # C. EFECTO TELEPATÍA (Palabra por palabra)
+        # --- 3. Efecto Telepatía ---
+        import time
         placeholder = st.empty()
         res_progresiva = ""
         for word in full_res.split():
@@ -248,10 +257,9 @@ if prompt or archivo_img:
         placeholder.markdown(full_res)
         st.session_state.messages.append({"role": "assistant", "content": full_res})
 
-        # D. MOTOR DE VOZ JORGE (Filtro Bíblico)
+        # --- 4. Motor de Voz (Blindaje Anti-Crash) ---
         with st.spinner("🎙️ Preparando sermón..."):
             import edge_tts, asyncio, re
-            # Filtro: Reemplaza "Mateo 13:3" por "Mateo 13 3" para que no lea 13:03 AM
             texto_voz = full_res.replace("*","").replace("#","")
             texto_voz = re.sub(r'(\d+):(\d+)', r'\1 \2', texto_voz) 
             
@@ -261,19 +269,29 @@ if prompt or archivo_img:
                 async for chunk in c.stream():
                     if chunk["type"] == "audio": data += chunk["data"]
                 return data
-            st.session_state.audio_data = asyncio.run(voz())
-            st.rerun() # Recarga para mostrar solo la barra de abajo
+                
+            # El truco para que el servidor no explote con la segunda pregunta
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                
+            st.session_state.audio_data = loop.run_until_complete(voz())
 
-# 3. ZONA DE EXPORTACIÓN Y AUDIO ÚNICO
+# ==========================================
+# 3. ZONA DE EXPORTACIÓN Y AUDIO (Fija al fondo)
+# ==========================================
 if "audio_data" in st.session_state:
     st.markdown("---")
-    st.audio(st.session_state.audio_data, format='audio/mp3') # Única barra de audio
+    st.audio(st.session_state.audio_data, format='audio/mp3')
     
-    doc_final = f"=== ESTUDIO BÍBLICO: {st.session_state.rol.upper()} ===\n\n{st.session_state.messages[-1]['content'] if st.session_state.messages else ''}"
-    st.download_button(
-        label="📄 Descargar Sermón Proclamado",
-        data=doc_final.encode('utf-8-sig'),
-        file_name=f"Sermon_Evangelista_{int(time.time())}.txt",
-        mime="text/plain"
-    )
+    if st.session_state.messages:
+        doc_final = f"=== ESTUDIO BÍBLICO ===\n\n{st.session_state.messages[-1]['content']}"
+        st.download_button(
+            label="📄 Descargar Sermón Proclamado",
+            data=doc_final.encode('utf-8-sig'),
+            file_name=f"Sermon_{int(time.time())}.txt",
+            mime="text/plain"
+        )
 
