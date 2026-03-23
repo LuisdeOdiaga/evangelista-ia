@@ -181,15 +181,15 @@ if "messages" not in st.session_state:
 for message in st.session_state.messages:
     st.chat_message(message["role"]).markdown(message["content"])
 
-# ## --- MOTOR VISUAL ---
+#---- MOTOR VISUAL ---
 
-# 1. PANEL LATERAL (Ingesta para Admin / Visión para Todos)
+# 1. PANEL LATERAL (Ingesta y Visión)
 with st.sidebar:
     if st.session_state.rol == "admin":
-        st.header("📚 Ingesta Teológica (Admin)")
+        st.header("📚 Ingesta Teológica")
         archivo_pdf = st.file_uploader("Sube un libro (PDF)", type=["pdf"])
         if archivo_pdf and st.button("🧠 Memorizar"):
-            with st.spinner("Inyectando en Pinecone..."):
+            with st.spinner("Inyectando sabiduría..."):
                 lector = PyPDF2.PdfReader(archivo_pdf)
                 texto = "".join([p.extract_text() for p in lector.pages])
                 frags = [texto[i:i+1000] for i in range(0, len(texto), 1000)]
@@ -198,59 +198,73 @@ with st.sidebar:
                     index.upsert(vectors=[{"id":f"p_{i}","values":v,"metadata":{"texto":f}}])
                 st.success("¡Memoria inyectada!")
 
-    st.header("🧐 Visión Teológica (Todos)")
-    archivo_img = st.file_uploader("Sube una imagen para analizar", type=["jpg", "png", "jpeg"])
+    st.header("🧐 Visión Teológica")
+    archivo_img = st.file_uploader("Analizar imagen sagrada", type=["jpg", "png", "jpeg"])
 
 # 2. CAJA DE CHAT
 prompt = st.chat_input("Escribe tu duda teológica profunda...")
 
 if prompt or archivo_img:
-    # Lógica de procesamiento (Si hay imagen, la analizamos)
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"): st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # 1. Búsqueda de contexto
+        # A. Búsqueda de Contexto
         v_p = obtener_vector(prompt if prompt else "Imagen analizada")
         res = index.query(vector=v_p, top_k=2, include_metadata=True)
         ctx = "\n".join([m['metadata']['texto'] for m in res['matches']]) if res['matches'] else ""
         
-        # 2. Generación de respuesta
+        # B. Generación con ADN (Forzamos estilo)
         chat = model.start_chat(history=[{"role": m["role"], "parts": [m["content"]]} for m in st.session_state.messages[:-1]])
-        response = chat.send_message(f"Contexto: {ctx}\n\nPregunta: {prompt}")
+        instruccion_estilo = "\n(Responde con encabezados elegantes, usa negritas y un tono solemne de revelación)."
+        
+        # Lógica de Visión o Texto
+        if archivo_img:
+            from PIL import Image
+            img = Image.open(archivo_img)
+            response = model.generate_content([prompt if prompt else "Explica esta imagen teológicamente", img])
+        else:
+            response = chat.send_message(f"Contexto: {ctx}\n\nPregunta: {prompt}{instruccion_estilo}")
+        
         full_res = response.text
         
-        # 3. Efecto Telepatía
+        # C. EFECTO TELEPATÍA (Palabra por palabra)
         placeholder = st.empty()
+        res_progresiva = ""
+        for word in full_res.split():
+            res_progresiva += word + " "
+            placeholder.markdown(res_progresiva + "▌")
+            time.sleep(0.05)
         placeholder.markdown(full_res)
         st.session_state.messages.append({"role": "assistant", "content": full_res})
 
-        # 4. Motor de Voz con memoria de sesión
-        with st.spinner("🎙️ Jorge está preparando el sermón..."):
-            import edge_tts, asyncio
+        # D. MOTOR DE VOZ JORGE (Filtro Bíblico)
+        with st.spinner("🎙️ Preparando sermón..."):
+            import edge_tts, asyncio, re
+            # Filtro: Reemplaza "Mateo 13:3" por "Mateo 13 3" para que no lea 13:03 AM
+            texto_voz = full_res.replace("*","").replace("#","")
+            texto_voz = re.sub(r'(\d+):(\d+)', r'\1 \2', texto_voz) 
+            
             async def voz():
-                t = full_res.replace("*","").replace("#","")
-                c = edge_tts.Communicate(t, "es-MX-JorgeNeural", rate="+5%") # Un poco más rápido
+                c = edge_tts.Communicate(texto_voz, "es-MX-JorgeNeural", rate="+7%")
                 data = b""
                 async for chunk in c.stream():
                     if chunk["type"] == "audio": data += chunk["data"]
                 return data
             st.session_state.audio_data = asyncio.run(voz())
-            st.audio(st.session_state.audio_data, format='audio/mp3')
+            st.rerun() # Recarga para mostrar solo la barra de abajo
 
-# 3. EXPORTACIÓN (Se mantiene visible si hay audio/texto)
+# 3. ZONA DE EXPORTACIÓN Y AUDIO ÚNICO
 if "audio_data" in st.session_state:
     st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.audio(st.session_state.audio_data, format='audio/mp3') # Mantiene el audio vivo
-    with col2:
-        doc_final = f"=== ESTUDIO BÍBLICO: EVANGELISTA IA ===\n\n{st.session_state.messages[-1]['content'] if st.session_state.messages else ''}"
-        st.download_button(
-            label="📄 Descargar Sermón (Texto Limpio)",
-            data=doc_final.encode('utf-8-sig'), # <--- ESTO ARREGLA LOS JEROGLÍFICOS
-            file_name=f"Sermon_{int(time.time())}.txt",
-            mime="text/plain"
-        )
+    st.audio(st.session_state.audio_data, format='audio/mp3') # Única barra de audio
+    
+    doc_final = f"=== ESTUDIO BÍBLICO: {st.session_state.rol.upper()} ===\n\n{st.session_state.messages[-1]['content'] if st.session_state.messages else ''}"
+    st.download_button(
+        label="📄 Descargar Sermón Proclamado",
+        data=doc_final.encode('utf-8-sig'),
+        file_name=f"Sermon_Evangelista_{int(time.time())}.txt",
+        mime="text/plain"
+    )
 
