@@ -289,8 +289,8 @@ if "audio_data" in st.session_state:
     if st.session_state.messages:
         ultimo_mensaje = st.session_state.messages[-1]['content']
         
-        # --- MOTOR DE IMPRENTA PDF ---
-        import re  # <--- ¡LA HERRAMIENTA QUE FALTABA!
+        # --- MOTOR DE IMPRENTA PDF OPTIMIZADO ---
+        import re
         import time
         from io import BytesIO
         from reportlab.lib.pagesizes import letter
@@ -302,10 +302,7 @@ if "audio_data" in st.session_state:
             doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
             styles = getSampleStyleSheet()
             
-            # 1. Filtro: Las fuentes de PDF no leen emojis, así que los limpiamos
             texto_limpio = re.sub(r'[^\w\s.,;:\-\'\"?!¿¡()\[\]áéíóúÁÉÍÓÚñÑüÜ]', ' ', texto_md)
-            
-            # 2. Traductor: Convertimos los asteriscos en negritas reales de PDF
             texto_limpio = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', texto_limpio)
             texto_limpio = re.sub(r'\*(.*?)\*', r'<i>\1</i>', texto_limpio)
             
@@ -313,7 +310,6 @@ if "audio_data" in st.session_state:
             story.append(Paragraph("<b>=== ESTUDIO BÍBLICO: EVANGELISTA IA ===</b>", styles["Heading2"]))
             story.append(Spacer(1, 15))
             
-            # 3. Moldeado de párrafos
             for parrafo in texto_limpio.split('\n'):
                 if parrafo.strip():
                     if parrafo.startswith('#'):
@@ -325,6 +321,12 @@ if "audio_data" in st.session_state:
                     
             doc.build(story)
             return buffer.getvalue()
+
+        # --- ESCUDO ANTI-ECO (Caché de Imprenta) ---
+        # Solo generamos el PDF si el mensaje es nuevo, si no, usamos el guardado
+        if "pdf_generado" not in st.session_state or st.session_state.get("ultimo_pdf_texto") != ultimo_mensaje:
+            st.session_state.pdf_generado = crear_pdf(ultimo_mensaje)
+            st.session_state.ultimo_pdf_texto = ultimo_mensaje
 
         # --- BOTONES DE DESCARGA VISUALES ---
         st.write("📥 **Opciones de Descarga del Último Sermón:**")
@@ -339,11 +341,10 @@ if "audio_data" in st.session_state:
             )
             
         with col2:
-            pdf_bytes = crear_pdf(ultimo_mensaje)
             st.download_button(
                 label="📕 Descargar en PDF",
-                data=pdf_bytes,
+                data=st.session_state.pdf_generado,
                 file_name=f"Sermon_{int(time.time())}.pdf",
-                mime="application/pdf"
+                mime="application/octet-stream" # <--- ¡EL TRUCO ESTÁ AQUÍ!
             )
 
