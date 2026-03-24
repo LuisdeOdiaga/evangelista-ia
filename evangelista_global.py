@@ -365,11 +365,13 @@ if "audio_data" in st.session_state:
                     mime="text/plain"
                 )
                 
-            with col2:
-                st.download_button(
-                    label="📕 Descargar en PDF",
-                    data=st.session_state.pdf_generado,
-                    file_name=f"Sermon_{int(time.time())}.pdf",
-                    mime="application/octet-stream"
-                )
+        # ---------------- PDF ----------------
+        with col2:
+            st.download_button(
+                label="📕 Descargar en PDF",
+                data=st.session_state.pdf_generado,
+                file_name="Sermon.pdf",
+                mime="application/octet-stream", # <--- EL BYPASS HACKER
+                key="download_pdf_btn"
+            )
 
