@@ -219,6 +219,14 @@ with st.sidebar:
     st.header("🧐 Visión Teológica")
     archivo_img = st.file_uploader("Analizar imagen sagrada", type=["jpg", "png", "jpeg"])
 
+    # --- BOTÓN DE PURGA DE MEMORIA ---
+    st.markdown("---")
+    if st.button("🧹 Limpiar Historial"):
+        st.session_state.messages = []
+        if "audio_data" in st.session_state:
+            del st.session_state["audio_data"]
+        st.rerun()
+
 # ==========================================
 # 1.2. ZONA DE CHAT (Memoria Visual)
 # ==========================================
@@ -305,62 +313,63 @@ if "audio_data" in st.session_state:
     if st.session_state.messages:
         ultimo_mensaje = st.session_state.messages[-1]['content']
         
-        # --- MOTOR DE IMPRENTA PDF OPTIMIZADO ---
-        import re
-        import time
-        from io import BytesIO
-        from reportlab.lib.pagesizes import letter
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-        from reportlab.lib.styles import getSampleStyleSheet
-        
-        def crear_pdf(texto_md):
-            buffer = BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
-            styles = getSampleStyleSheet()
+        # --- LA CAJA FUERTE VISUAL (Matando el Fantasma) ---
+        with st.expander("📥 Opciones de Descarga del Último Sermón", expanded=True):
             
-            texto_limpio = re.sub(r'[^\w\s.,;:\-\'\"?!¿¡()\[\]áéíóúÁÉÍÓÚñÑüÜ]', ' ', texto_md)
-            texto_limpio = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', texto_limpio)
-            texto_limpio = re.sub(r'\*(.*?)\*', r'<i>\1</i>', texto_limpio)
+            # --- MOTOR DE IMPRENTA PDF OPTIMIZADO ---
+            import re
+            import time
+            from io import BytesIO
+            from reportlab.lib.pagesizes import letter
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+            from reportlab.lib.styles import getSampleStyleSheet
             
-            story = []
-            story.append(Paragraph("<b>=== ESTUDIO BÍBLICO: EVANGELISTA IA ===</b>", styles["Heading2"]))
-            story.append(Spacer(1, 15))
-            
-            for parrafo in texto_limpio.split('\n'):
-                if parrafo.strip():
-                    if parrafo.startswith('#'):
-                        texto_h = parrafo.replace('#', '').strip()
-                        story.append(Paragraph(f"<b>{texto_h}</b>", styles["Heading3"]))
-                    else:
-                        story.append(Paragraph(parrafo, styles["BodyText"]))
-                    story.append(Spacer(1, 10))
-                    
-            doc.build(story)
-            return buffer.getvalue()
+            def crear_pdf(texto_md):
+                buffer = BytesIO()
+                doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
+                styles = getSampleStyleSheet()
+                
+                texto_limpio = re.sub(r'[^\w\s.,;:\-\'\"?!¿¡()\[\]áéíóúÁÉÍÓÚñÑüÜ]', ' ', texto_md)
+                texto_limpio = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', texto_limpio)
+                texto_limpio = re.sub(r'\*(.*?)\*', r'<i>\1</i>', texto_limpio)
+                
+                story = []
+                story.append(Paragraph("<b>=== ESTUDIO BÍBLICO: EVANGELISTA IA ===</b>", styles["Heading2"]))
+                story.append(Spacer(1, 15))
+                
+                for parrafo in texto_limpio.split('\n'):
+                    if parrafo.strip():
+                        if parrafo.startswith('#'):
+                            texto_h = parrafo.replace('#', '').strip()
+                            story.append(Paragraph(f"<b>{texto_h}</b>", styles["Heading3"]))
+                        else:
+                            story.append(Paragraph(parrafo, styles["BodyText"]))
+                        story.append(Spacer(1, 10))
+                        
+                doc.build(story)
+                return buffer.getvalue()
 
-        # --- ESCUDO ANTI-ECO (Caché de Imprenta) ---
-        # Solo generamos el PDF si el mensaje es nuevo, si no, usamos el guardado
-        if "pdf_generado" not in st.session_state or st.session_state.get("ultimo_pdf_texto") != ultimo_mensaje:
-            st.session_state.pdf_generado = crear_pdf(ultimo_mensaje)
-            st.session_state.ultimo_pdf_texto = ultimo_mensaje
+            # --- ESCUDO ANTI-ECO ---
+            if "pdf_generado" not in st.session_state or st.session_state.get("ultimo_pdf_texto") != ultimo_mensaje:
+                st.session_state.pdf_generado = crear_pdf(ultimo_mensaje)
+                st.session_state.ultimo_pdf_texto = ultimo_mensaje
 
-        # --- BOTONES DE DESCARGA VISUALES ---
-        st.write("📥 **Opciones de Descarga del Último Sermón:**")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.download_button(
-                label="📄 Descargar en TXT",
-                data=f"=== ESTUDIO BÍBLICO ===\n\n{ultimo_mensaje}".encode('utf-8-sig'),
-                file_name=f"Sermon_{int(time.time())}.txt",
-                mime="text/plain"
-            )
+            # --- BOTONES DE DESCARGA DENTRO DE LA CAJA ---
+            col1, col2 = st.columns(2)
             
-        with col2:
-            st.download_button(
-                label="📕 Descargar en PDF",
-                data=st.session_state.pdf_generado,
-                file_name=f"Sermon_{int(time.time())}.pdf",
-                mime="application/octet-stream" # <--- ¡EL TRUCO ESTÁ AQUÍ!
-            )
+            with col1:
+                st.download_button(
+                    label="📄 Descargar en TXT",
+                    data=f"=== ESTUDIO BÍBLICO ===\n\n{ultimo_mensaje}".encode('utf-8-sig'),
+                    file_name=f"Sermon_{int(time.time())}.txt",
+                    mime="text/plain"
+                )
+                
+            with col2:
+                st.download_button(
+                    label="📕 Descargar en PDF",
+                    data=st.session_state.pdf_generado,
+                    file_name=f"Sermon_{int(time.time())}.pdf",
+                    mime="application/octet-stream"
+                )
 
