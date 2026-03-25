@@ -314,7 +314,6 @@ if "audio_data" in st.session_state:
         ultimo_mensaje = st.session_state.messages[-1]['content']
         
         # --- LA CAJA FUERTE VISUAL (Matando el Fantasma) ---
-        with st.expander("📥 Opciones de Descarga del Último Sermón", expanded=True):
             
             # --- MOTOR DE IMPRENTA PDF OPTIMIZADO ---
             import re
@@ -359,15 +358,19 @@ if "audio_data" in st.session_state:
     # ==========================================
     with st.expander("📥 Opciones de Descarga del Último Sermón", expanded=True):
         import base64
+        import time
+
+        # Generamos un número único basado en la hora para que Android no pregunte si quieres "volver a descargar"
+        marca_tiempo = int(time.time())
 
         # 1. Preparar el TXT en Base64
         texto_txt = f"=== ESTUDIO BÍBLICO ===\n\n{ultimo_mensaje}".encode('utf-8-sig')
         b64_txt = base64.b64encode(texto_txt).decode()
-        enlace_txt = f'<a href="data:text/plain;base64,{b64_txt}" download="Sermon.txt" style="text-decoration:none; background-color:#2e2e38; color:white; padding:10px 20px; border-radius:5px; display:inline-block; border: 1px solid #4a4a5a;">📄 Descargar en TXT</a>'
+        enlace_txt = f'<a href="data:text/plain;base64,{b64_txt}" download="Sermon_{marca_tiempo}.txt" style="text-decoration:none; background-color:#2e2e38; color:white; padding:10px 20px; border-radius:5px; display:inline-block; border: 1px solid #4a4a5a;">📄 Descargar en TXT</a>'
 
         # 2. Preparar el PDF en Base64
         b64_pdf = base64.b64encode(st.session_state.pdf_generado).decode()
-        enlace_pdf = f'<a href="data:application/octet-stream;base64,{b64_pdf}" download="Sermon.pdf" style="text-decoration:none; background-color:#ff4b4b; color:white; padding:10px 20px; border-radius:5px; display:inline-block;">📕 Descargar en PDF</a>'
+        enlace_pdf = f'<a href="data:application/octet-stream;base64,{b64_pdf}" download="Sermon_{marca_tiempo}.pdf" style="text-decoration:none; background-color:#ff4b4b; color:white; padding:10px 20px; border-radius:5px; display:inline-block;">📕 Descargar en PDF</a>'
 
         # 3. Inyectar HTML directo a la pantalla
         st.markdown(f"{enlace_txt} &nbsp;&nbsp; {enlace_pdf}", unsafe_allow_html=True)
