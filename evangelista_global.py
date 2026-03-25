@@ -234,43 +234,48 @@ for mensaje in st.session_state.messages:
         st.markdown(mensaje["content"])
 
 # B. La Caja de Entrada
-archivo_img = st.file_uploader("📷 Subir imagen sagrada", type=["jpg", "png", "jpeg"], key="ojo_de_gemini")
-prompt = st.chat_input("Escribe tu duda teológica profunda...")
+with st.form("form_vision", clear_on_submit=True):
+    archivo_img = st.file_uploader("📷 Subir imagen sagrada", type=["jpg", "png", "jpeg"])
+    btn_subir = st.form_submit_button("Cargar al Servidor")
 
-if prompt or archivo_img:
+   prompt = st.chat_input("Escribe tu duda teológica profunda...")
+
+if prompt or (btn_subir and archivo_img is not None):
+    # 1. Burbuja del Usuario
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
+    # 2. Burbuja del Asistente
     with st.chat_message("assistant"):
         # --- 1. Traductor de Memoria ---
         historial_gemini = []
         for m in st.session_state.messages[:-1]:
             rol_gemini = "model" if m["role"] == "assistant" else "user"
             historial_gemini.append({"role": rol_gemini, "parts": [m["content"]]})
-            chat = model.start_chat(history=historial_gemini)
-
-            # --- 2. Búsqueda y Generación (Pinecone) ---
-            texto_busqueda = prompt if prompt else "Analiza esta imagen sagrada"
-            v_p = obtener_vector(texto_busqueda)
-            
-            res = index.query(vector=v_p, top_k=2, include_metadata=True)
-            ctx = "\n".join([m['metadata']['texto'] for m in res['matches']])
-            
-            instruccion_estilo = "\n\n(Responde con encabezados, tono solemne y teológico basándote en el contexto si aplica)."
-            prompt_final = f"Contexto del libro:\n{ctx}\n\nPregunta: {texto_busqueda}\n{instruccion_estilo}"
-
-            # --- 3. EL NERVIO ÓPTICO (El Envío Real) ---
-            if archivo_img is not None:
-                from PIL import Image
-                img_abierta = Image.open(archivo_img)
-                response = chat.send_message([prompt_final, img_abierta])
-            else:
-                response = chat.send_message(prompt_final)
-
-            full_res = response.text
         
+        chat = model.start_chat(history=historial_gemini)
+
+        # --- 2. Búsqueda y Generación (Pinecone) ---
+        texto_busqueda = prompt if prompt else "Analiza esta imagen sagrada"
+        v_p = obtener_vector(texto_busqueda)
+        
+        res = index.query(vector=v_p, top_k=2, include_metadata=True)
+        ctx = "\n".join([m['metadata']['texto'] for m in res['matches']])
+        
+        instruccion_estilo = "\n\n(Responde con encabezados y estilo de exégesis bíblica.)"
+        prompt_final = f"Contexto del libro:\n{ctx}\n\nPregunta: {prompt}\n{instruccion_estilo}" if prompt else f"Contexto del libro:\n{ctx}\n\nAnaliza esta imagen teológicamente.\n{instruccion_estilo}"
+
+        # --- 3. EL NERVIO ÓPTICO (El Envío Real) ---
+        if archivo_img is not None:
+            from PIL import Image
+            img_abierta = Image.open(archivo_img)
+            response = chat.send_message([prompt_final, img_abierta])
+        else:
+            response = chat.send_message(prompt_final)
+
+        full_res = response.text
         # --- 3. Efecto Telepatía ---
         import time
         placeholder = st.empty()
