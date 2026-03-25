@@ -233,23 +233,21 @@ for mensaje in st.session_state.messages:
     with st.chat_message(mensaje["role"]):
         st.markdown(mensaje["content"])
 
-# B. La Caja de Entrada
+# B. La Caja de Entrada Unificada (Arquitectura Nivel Pro)
 with st.form("form_vision", clear_on_submit=True):
     archivo_img = st.file_uploader("📷 Subir imagen sagrada", type=["jpg", "png", "jpeg"])
-    btn_subir = st.form_submit_button("Cargar al Servidor")
+    prompt = st.text_area("Escribe tu duda teológica profunda...", height=100)
+    btn_enviar = st.form_submit_button("Enviar Consulta")
 
-prompt = st.chat_input("Escribe tu duda teológica profunda...")
-
-if prompt or (btn_subir and archivo_img is not None):
+if btn_enviar and (prompt or archivo_img is not None):
     # 1. Burbuja del Usuario
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+    texto_usuario = prompt if prompt else "📷 [Imagen enviada para análisis]"
+    st.session_state.messages.append({"role": "user", "content": texto_usuario})
+    with st.chat_message("user"):
+        st.markdown(texto_usuario)
 
     # 2. Burbuja del Asistente
     with st.chat_message("assistant"):
-        # --- 1. Traductor de Memoria ---
         historial_gemini = []
         for m in st.session_state.messages[:-1]:
             rol_gemini = "model" if m["role"] == "assistant" else "user"
@@ -257,41 +255,60 @@ if prompt or (btn_subir and archivo_img is not None):
         
         chat = model.start_chat(history=historial_gemini)
 
-        # --- 2. Búsqueda y Generación (Pinecone) ---
-        texto_busqueda = prompt if prompt else "Analiza esta imagen sagrada"
-        v_p = obtener_vector(texto_busqueda)
-        
-        res = index.query(vector=v_p, top_k=2, include_metadata=True)
-        ctx = "\n".join([m['metadata']['texto'] for m in res['matches']])
-        
-        instruccion_estilo = "\n\n(Responde con encabezados y estilo de exégesis bíblica.)"
-        prompt_final = f"Contexto del libro:\n{ctx}\n\nPregunta: {prompt}\n{instruccion_estilo}" if prompt else f"Contexto del libro:\n{ctx}\n\nAnaliza esta imagen teológicamente.\n{instruccion_estilo}"
+        # --- PROTECCIÓN CONTRA CAÍDAS (Tu Solución) ---
+        try:
+            with st.spinner("Procesando revelación en la nube..."):
+                # Búsqueda y Generación (Pinecone)
+                texto_busqueda = prompt if prompt else "Analiza esta imagen sagrada teológicamente"
+                v_p = obtener_vector(texto_busqueda)
+                
+                res = index.query(vector=v_p, top_k=2, include_metadata=True)
+                ctx = "\n".join([m['metadata']['texto'] for m in res['matches']])
+                
+                instruccion_estilo = "\n\n(Responde con encabezados y estilo de exégesis bíblica.)"
+                prompt_final = f"Contexto del libro:\n{ctx}\n\nPregunta: {prompt}\n{instruccion_estilo}" if prompt else f"Contexto del libro:\n{ctx}\n\nAnaliza esta imagen.\n{instruccion_estilo}"
 
-        # --- 3. EL NERVIO ÓPTICO (El Envío Real) ---
-        if archivo_img is not None:
-            from PIL import Image
-            img_abierta = Image.open(archivo_img)
-            response = chat.send_message([prompt_final, img_abierta])
-        else:
-            response = chat.send_message(prompt_final)
+                # EL NERVIO ÓPTICO (Manejo de Bytes)
+                if archivo_img is not None:
+                    from PIL import Image
+                    import io
+                    img = Image.open(archivo_img)
+                    
+                    # Convertir a RGB por si es un PNG transparente que cause error en JPEG
+                    if img.mode != 'RGB':
+                        img = img.convert('RGB')
+                        
+                    img_bytes = io.BytesIO()
+                    img.save(img_bytes, format="JPEG", quality=85) # Reducimos calidad para salvar RAM
+                    
+                    response = chat.send_message([
+                        prompt_final,
+                        {"mime_type": "image/jpeg", "data": img_bytes.getvalue()}
+                    ])
+                else:
+                    response = chat.send_message(prompt_final)
 
-        full_res = response.text
-        # --- 3. Efecto Telepatía ---
-        import time
-        placeholder = st.empty()
-        res_progresiva = ""
-        for word in full_res.split():
-            res_progresiva += word + " "
-            placeholder.markdown(res_progresiva + "▌")
-            time.sleep(0.05)
-        placeholder.markdown(full_res)
-        st.session_state.messages.append({"role": "assistant", "content": full_res})
+                full_res = response.text
+                
+                # Efecto Telepatía
+                import time
+                placeholder = st.empty()
+                res_progresiva = ""
+                for word in full_res.split():
+                    res_progresiva += word + " "
+                    placeholder.markdown(res_progresiva + "▌")
+                    time.sleep(0.05)
+                placeholder.markdown(full_res)
+                st.session_state.messages.append({"role": "assistant", "content": full_res})
 
-        # --- 4. Motor de Voz (Blindaje Anti-Crash) ---
-        with st.spinner("🎙️ Preparando sermón..."):
-            import edge_tts, asyncio, re
-            texto_voz = full_res.replace("*","").replace("#","")
-            texto_voz = re.sub(r'(\d+):(\d+)', r'\1 \2', texto_voz) 
+        except Exception as e:
+            st.error(f"Hubo una interferencia en el servidor: {e}")
+
+            # --- 4. Motor de Voz (Blindaje Anti-Crash) ---
+            with st.spinner("🎙️ Preparando sermón..."):
+                import edge_tts, asyncio, re
+                texto_voz = full_res.replace("*","").replace("#","")
+                texto_voz = re.sub(r'(\d+):(\d+)', r'\1 \2', texto_voz) 
             
             async def voz():
                 c = edge_tts.Communicate(texto_voz, "es-MX-JorgeNeural", rate="+7%")
