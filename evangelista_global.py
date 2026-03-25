@@ -319,16 +319,16 @@ if btn_enviar and (prompt or archivo_img is not None):
                     if chunk["type"] == "audio": data += chunk["data"]
                 return data
                 
-            # El truco para que el servidor no explote con la segunda pregunta
-            try:
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                
+        # El truco para que el servidor no explote con...
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
         audio_generado = loop.run_until_complete(voz())
-        st.session_state.messages[-1]["audio"] = audio_generado 
-        st.audio(audio_generado, format="audio/mp3")            
+        st.session_state.messages[-1]["audio"] = audio_generado
+        st.audio(audio_generado, format="audio/mp3")
 
 # ==========================================
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
