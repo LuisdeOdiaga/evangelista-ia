@@ -218,7 +218,7 @@ with st.sidebar:
 
     st.header("🧐 Visión Teológica")
         # --- EL NERVIO ÓPTICO (Reconexión Visual) ---
-        if archivo_img is not None:
+    if archivo_img is not None:
             # 1. Si el usuario subió una imagen, la abrimos
             img_abierta = Image.open(archivo_img)
             
