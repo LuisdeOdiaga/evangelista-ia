@@ -186,6 +186,8 @@ for message in st.session_state.messages:
 # ## --- MOTOR VISUAL ---
 
 # 1. PANEL LATERAL (Ingesta y Visión)
+with st.sidebar:
+    if st.session_state.rol == "admin":
         st.header("📚 Ingesta Teológica")
         archivo_pdf = st.file_uploader("Sube un libro (PDF)", type=["pdf"])
         if archivo_pdf and st.button("🧠 Memorizar"):
