@@ -312,16 +312,16 @@ if "audio_data" in st.session_state:
     
     if st.session_state.messages:
         ultimo_mensaje = st.session_state.messages[-1]['content']
-        
+      
         # --- LA CAJA FUERTE VISUAL (Matando el Fantasma) ---
-            
+      
             # --- MOTOR DE IMPRENTA PDF OPTIMIZADO ---
-            import re
-            import time
-            from io import BytesIO
-            from reportlab.lib.pagesizes import letter
-            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-            from reportlab.lib.styles import getSampleStyleSheet
+import re
+import time
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
             
             def crear_pdf(texto_md):
                 buffer = BytesIO()
