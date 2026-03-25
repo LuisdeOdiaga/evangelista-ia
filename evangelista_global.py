@@ -217,6 +217,7 @@ with st.sidebar:
                     st.error(f"🚨 Error en el motor de asimilación: {e}")
 
     st.header("🧐 Visión Teológica")
+    archivo_img = st.file_uploader("Analizar imagen sagrada", type=["jpg", "png", "jpeg"])
         # --- EL NERVIO ÓPTICO (Reconexión Visual) ---
     if archivo_img is not None:
         # 1. Si el usuario subió una imagen, la abrimos
