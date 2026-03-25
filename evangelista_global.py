@@ -217,7 +217,7 @@ with st.sidebar:
                     st.error(f"🚨 Error en el motor de asimilación: {e}")
 
     st.header("🧐 Visión Teológica")
-    archivo_img = st.file_uploader("Analizar imagen sagrada", type=["jpg", "png", "jpeg"])
+    archivo_img = st.file_uploader("Analizar imagen sagrada", type=["jpg", "png", "jpeg"], key="ojo_de_gemini")
 
     # --- BOTÓN DE PURGA DE MEMORIA ---
     st.markdown("---")
