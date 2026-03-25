@@ -238,7 +238,7 @@ with st.form("form_vision", clear_on_submit=True):
     archivo_img = st.file_uploader("📷 Subir imagen sagrada", type=["jpg", "png", "jpeg"])
     btn_subir = st.form_submit_button("Cargar al Servidor")
 
-   prompt = st.chat_input("Escribe tu duda teológica profunda...")
+prompt = st.chat_input("Escribe tu duda teológica profunda...")
 
 if prompt or (btn_subir and archivo_img is not None):
     # 1. Burbuja del Usuario
