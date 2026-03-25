@@ -219,16 +219,16 @@ with st.sidebar:
     st.header("🧐 Visión Teológica")
         # --- EL NERVIO ÓPTICO (Reconexión Visual) ---
     if archivo_img is not None:
-            # 1. Si el usuario subió una imagen, la abrimos
-            img_abierta = Image.open(archivo_img)
+        # 1. Si el usuario subió una imagen, la abrimos
+       img_abierta = Image.open(archivo_img)
             
-            # 2. Le mandamos a Gemini el texto del usuario Y la imagen al mismo tiempo
-            # (Ajusta 'prompt' y 'contexto' según cómo los tengas en tu código actual)
-            respuesta = chat.send_message([prompt_final, img_abierta]) 
+        # 2. Le mandamos a Gemini el texto del usuario Y la imagen al mismo tiempo
+        # (Ajusta 'prompt' y 'contexto' según cómo los tengas en tu código actual)
+       respuesta = chat.send_message([prompt_final, img_abierta]) 
             
-        else:
-            # 3. Si no hay imagen, funciona normal (solo texto)
-            respuesta = chat.send_message(prompt_final)
+    else:
+        # 3. Si no hay imagen, funciona normal (solo texto)
+       respuesta = chat.send_message(prompt_final)
 
     # --- BOTÓN DE PURGA DE MEMORIA ---
     st.markdown("---")
