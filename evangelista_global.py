@@ -93,10 +93,10 @@ st.markdown("""
 
 # --- INICIALIZACIÓN DEL SISTEMA DE SEGURIDAD ---
 if "autenticado" not in st.session_state:
-    st.session_state.autenticado = False
+    st.session_state.autenticado = True
 
 if "rol" not in st.session_state:
-    st.session_state.rol = None
+    st.session_state.rol = "admin"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -107,9 +107,9 @@ if "messages" not in st.session_state:
 
 # 1. Inicialización de Memoria de Sesión
 if "autenticado" not in st.session_state:
-    st.session_state.autenticado = False
+    st.session_state.autenticado = True
 if "rol" not in st.session_state:
-    st.session_state.rol = None
+    st.session_state.rol = "admin"
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
