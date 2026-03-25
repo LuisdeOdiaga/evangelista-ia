@@ -228,10 +228,12 @@ with st.sidebar:
 # 1.2. ZONA DE CHAT (Memoria Visual)
 # ==========================================
 
-# A. Imprimir los mensajes anteriores (¡Para que no desaparezcan!)
+# A. Imprimir los mensajes anteriores
 for mensaje in st.session_state.messages:
     with st.chat_message(mensaje["role"]):
         st.markdown(mensaje["content"])
+        if "audio" in mensaje:                            # <--- 8 espacios
+            st.audio(mensaje["audio"], format="audio/mp3") # <--- 12 espacios
 
 # B. La Caja de Entrada Unificada (Arquitectura Nivel Pro)
 with st.form("form_vision", clear_on_submit=True):
@@ -324,14 +326,13 @@ if btn_enviar and (prompt or archivo_img is not None):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 
-            st.session_state.audio_data = loop.run_until_complete(voz())
+        audio_generado = loop.run_until_complete(voz())
+        st.session_state.messages[-1]["audio"] = audio_generado 
+        st.audio(audio_generado, format="audio/mp3")            
 
 # ==========================================
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
 # ==========================================
-if "audio_data" in st.session_state:
-    st.markdown("---")
-    st.audio(st.session_state.audio_data, format='audio/mp3')
 
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
     ultimo_mensaje = st.session_state.messages[-1]['content']
