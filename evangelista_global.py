@@ -304,74 +304,69 @@ if prompt or archivo_img:
             st.session_state.audio_data = loop.run_until_complete(voz())
 
 # ==========================================
-# 3. ZONA DE EXPORTACIÓN Y AUDIO (Fija al fondo)
+# 3. ZONA DE EXPORTACIÓN Y AUDIO
 # ==========================================
 if "audio_data" in st.session_state:
     st.markdown("---")
     st.audio(st.session_state.audio_data, format='audio/mp3')
-    
-    if st.session_state.messages:
-        ultimo_mensaje = st.session_state.messages[-1]['content']
-      
-        # --- LA CAJA FUERTE VISUAL (Matando el Fantasma) ---
-      
-            # --- MOTOR DE IMPRENTA PDF OPTIMIZADO ---
-import re
-import time
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
-            
-            def crear_pdf(texto_md):
-                buffer = BytesIO()
-                doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
-                styles = getSampleStyleSheet()
-                
-                texto_limpio = re.sub(r'[^\w\s.,;:\-\'\"?!¿¡()\[\]áéíóúÁÉÍÓÚñÑüÜ]', ' ', texto_md)
-                texto_limpio = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', texto_limpio)
-                texto_limpio = re.sub(r'\*(.*?)\*', r'<i>\1</i>', texto_limpio)
-                
-                story = []
-                story.append(Paragraph("<b>=== ESTUDIO BÍBLICO: EVANGELISTA IA ===</b>", styles["Heading2"]))
-                story.append(Spacer(1, 15))
-                
-                for parrafo in texto_limpio.split('\n'):
-                    if parrafo.strip():
-                        if parrafo.startswith('#'):
-                            texto_h = parrafo.replace('#', '').strip()
-                            story.append(Paragraph(f"<b>{texto_h}</b>", styles["Heading3"]))
-                        else:
-                            story.append(Paragraph(parrafo, styles["BodyText"]))
-                        story.append(Spacer(1, 10))
-                        
-                doc.build(story)
-                return buffer.getvalue()
 
-            # --- ESCUDO ANTI-ECO ---
-            if "pdf_generado" not in st.session_state or st.session_state.get("ultimo_pdf_texto") != ultimo_mensaje:
-                st.session_state.pdf_generado = crear_pdf(ultimo_mensaje)
-                st.session_state.ultimo_pdf_texto = ultimo_mensaje
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
+    ultimo_mensaje = st.session_state.messages[-1]['content']
 
-    # ==========================================
-    # 📦 UI (BOTONES HTML ANTI-REINICIO)
-    # ==========================================
+    # --- DEPENDENCIAS SEGURAS ---
+    import re
+    from io import BytesIO
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet
+
+    # --- FUNCIÓN GENERADORA DE PDF ---
+    def crear_pdf(texto_md):
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
+        styles = getSampleStyleSheet()
+        
+        texto_limpio = re.sub(r'[^\w\s.,;:\-\'\"?!¿¡()\[\]áéíóúÁÉÍÓÚñÑüÜ]', ' ', texto_md)
+        texto_limpio = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', texto_limpio)
+        texto_limpio = re.sub(r'\*(.*?)\*', r'<i>\1</i>', texto_limpio)
+        
+        story = []
+        story.append(Paragraph("<b>=== ESTUDIO BÍBLICO: EVANGELISTA IA ===</b>", styles["Heading2"]))
+        story.append(Spacer(1, 15))
+        
+        for parrafo in texto_limpio.split('\n'):
+            if parrafo.strip():
+                if parrafo.startswith('#'):
+                    texto_h = parrafo.replace('#', '').strip()
+                    story.append(Paragraph(f"<b>{texto_h}</b>", styles["Heading3"]))
+                else:
+                    story.append(Paragraph(parrafo, styles["BodyText"]))
+                story.append(Spacer(1, 10))
+                
+        doc.build(story)
+        return buffer.getvalue()
+
+    # --- ESCUDO ANTI-ECO ---
+    if "pdf_generado" not in st.session_state or st.session_state.get("ultimo_pdf_texto") != ultimo_mensaje:
+        st.session_state.pdf_generado = crear_pdf(ultimo_mensaje)
+        st.session_state.ultimo_pdf_texto = ultimo_mensaje
+
+    # --- INTERFAZ ANTI-FANTASMAS (HTML Base64) ---
     with st.expander("📥 Opciones de Descarga del Último Sermón", expanded=True):
-    import base64
-    import time
+        import base64
+        import time
 
-        # Generamos un número único basado en la hora para que Android no pregunte si quieres "volver a descargar"
         marca_tiempo = int(time.time())
 
-        # 1. Preparar el TXT en Base64
+        # 1. Preparar el TXT
         texto_txt = f"=== ESTUDIO BÍBLICO ===\n\n{ultimo_mensaje}".encode('utf-8-sig')
         b64_txt = base64.b64encode(texto_txt).decode()
         enlace_txt = f'<a href="data:text/plain;base64,{b64_txt}" download="Sermon_{marca_tiempo}.txt" style="text-decoration:none; background-color:#2e2e38; color:white; padding:10px 20px; border-radius:5px; display:inline-block; border: 1px solid #4a4a5a;">📄 Descargar en TXT</a>'
 
-        # 2. Preparar el PDF en Base64
+        # 2. Preparar el PDF
         b64_pdf = base64.b64encode(st.session_state.pdf_generado).decode()
         enlace_pdf = f'<a href="data:application/octet-stream;base64,{b64_pdf}" download="Sermon_{marca_tiempo}.pdf" style="text-decoration:none; background-color:#ff4b4b; color:white; padding:10px 20px; border-radius:5px; display:inline-block;">📕 Descargar en PDF</a>'
 
-        # 3. Inyectar HTML directo a la pantalla
+        # 3. Inyectar botones
         st.markdown(f"{enlace_txt} &nbsp;&nbsp; {enlace_pdf}", unsafe_allow_html=True)
 
