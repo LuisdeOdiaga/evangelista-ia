@@ -186,8 +186,6 @@ for message in st.session_state.messages:
 # ## --- MOTOR VISUAL ---
 
 # 1. PANEL LATERAL (Ingesta y Visión)
-with st.sidebar:
-    if st.session_state.rol == "admin":
         st.header("📚 Ingesta Teológica")
         archivo_pdf = st.file_uploader("Sube un libro (PDF)", type=["pdf"])
         if archivo_pdf and st.button("🧠 Memorizar"):
@@ -216,9 +214,6 @@ with st.sidebar:
                 except Exception as e:
                     st.error(f"🚨 Error en el motor de asimilación: {e}")
 
-    st.header("🧐 Visión Teológica")
-    archivo_img = st.file_uploader("Analizar imagen sagrada", type=["jpg", "png", "jpeg"], key="ojo_de_gemini")
-
     # --- BOTÓN DE PURGA DE MEMORIA ---
     st.markdown("---")
     if st.button("🧹 Limpiar Historial"):
@@ -237,6 +232,7 @@ for mensaje in st.session_state.messages:
         st.markdown(mensaje["content"])
 
 # B. La Caja de Entrada
+archivo_img = st.file_uploader("📷 Subir imagen sagrada", type=["jpg", "png", "jpeg"], key="ojo_de_gemini")
 prompt = st.chat_input("Escribe tu duda teológica profunda...")
 
 if prompt or archivo_img:
@@ -245,13 +241,12 @@ if prompt or archivo_img:
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        with st.chat_message("assistant"):
-            # --- 1. Traductor de Memoria ---
-            historial_gemini = []
-            for m in st.session_state.messages[:-1]:
-                rol_gemini = "model" if m["role"] == "assistant" else "user"
-                historial_gemini.append({"role": rol_gemini, "parts": [m["content"]]})
-
+    with st.chat_message("assistant"):
+        # --- 1. Traductor de Memoria ---
+        historial_gemini = []
+        for m in st.session_state.messages[:-1]:
+            rol_gemini = "model" if m["role"] == "assistant" else "user"
+            historial_gemini.append({"role": rol_gemini, "parts": [m["content"]]})
             chat = model.start_chat(history=historial_gemini)
 
             # --- 2. Búsqueda y Generación (Pinecone) ---
