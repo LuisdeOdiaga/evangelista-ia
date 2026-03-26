@@ -287,7 +287,7 @@ if ejecutar and (prompt_final or archivo_img is not None):
                 
                 # --- SUPER PROMPT (El Lavado de Cerebro) ---
                 instruccion = "INSTRUCCIÓN MILITAR: Responde la 'Pregunta'. Si el 'Contexto' no tiene datos directos sobre lo que se pide (ej. habla de espiritualidad cuando se pide ciencia), IGNORA EL CONTEXTO POR COMPLETO. Activa tu conocimiento global (física, cosmología, historia) y da una cátedra magistral."
-                 prompt_final = f"Pregunta: {prompt_final}\n\nContexto: {ctx}\n\n{instruccion}"
+                prompt_final = f"Pregunta: {prompt_final}\n\nContexto: {ctx}\n\n{instruccion}"
 
                 # EL NERVIO ÓPTICO (Manejo de Bytes)
                 if archivo_img is not None:
