@@ -279,7 +279,7 @@ if ejecutar and (prompt_final or archivo_img is not None):
         try:
             with st.spinner("Procesando revelación en la nube..."):
                 # Búsqueda y Generación (Pinecone)
-                texto_busqueda = prompt if prompt else "Analiza esta imagen sagrada teológicamente"
+                texto_busqueda = prompt_final if prompt_final else "Analisis teologico general"
                 v_p = obtener_vector(texto_busqueda)
                 
                 res = index.query(vector=v_p, top_k=2, include_metadata=True)
