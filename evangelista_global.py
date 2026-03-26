@@ -243,9 +243,25 @@ with st.form("form_vision", clear_on_submit=True):
     prompt = st.text_area("Escribe tu duda teológica profunda...", height=100)
     btn_enviar = st.form_submit_button("Enviar Consulta")
 
-if btn_enviar and (prompt or archivo_img is not None):
+# --- PANEL LATERAL (Las Dudas de Tomás) ---
+with st.sidebar:
+    st.title("🛡️ Las Dudas de Tomás")
+    st.markdown("Preguntas teológicas frecuentes:")
+    btn_faq1 = st.button("¿Por qué Dios permite el mal?")
+    btn_faq2 = st.button("Pruebas de la Resurrección")
+    btn_faq3 = st.button("Ciencia y Génesis")
+
+prompt_faq = ""
+if btn_faq1: prompt_faq = "¿Por qué un Dios infinitamente bueno permite el mal y el sufrimiento en el mundo?"
+if btn_faq2: prompt_faq = "Cita las evidencias históricas y bíblicas más contundentes sobre la resurrección de Cristo."
+if btn_faq3: prompt_faq = "¿Cómo se concilia el relato de la creación del Génesis con la ciencia moderna?"
+
+ejecutar = btn_enviar or btn_faq1 or btn_faq2 or btn_faq3
+prompt_final = prompt_faq if prompt_faq else prompt
+
+if ejecutar and (prompt_final or archivo_img is not None):
     # 1. Burbuja del Usuario
-    texto_usuario = prompt if prompt else "📷 [Imagen enviada para análisis]"
+    texto_usuario = prompt_final if prompt_final else "📷 [Imagen enviada]"
     st.session_state.messages.append({"role": "user", "content": texto_usuario})
     with st.chat_message("user"):
         st.markdown(texto_usuario)
