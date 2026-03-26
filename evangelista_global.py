@@ -285,7 +285,7 @@ if ejecutar and (prompt_final or archivo_img is not None):
                 res = index.query(vector=v_p, top_k=2, include_metadata=True)
                 ctx = "\n".join([m['metadata']['texto'] for m in res['matches']])
                 
-                instruccion_estilo = "\n\n(Responde con encabezados y estilo de exégesis bíblica.)"
+                instruccion_estilo = "\n\n[INSTRUCCIÓN SUPREMA: Eres un apologista experto. Responde EXACTAMENTE a la pregunta del usuario. Si el 'Contexto' obtenido no tiene información directa sobre el tema (ej. ciencia, historia o debates), IGNÓRALO por completo y usa tu inmenso conocimiento global para dar una respuesta argumentada, teológica y magistral. Jamás menciones que estás viendo una imagen a menos que el usuario realmente te pregunte por una.]"
                 prompt_final = f"Contexto del libro:\n{ctx}\n\nPregunta: {prompt}\n{instruccion_estilo}" if prompt else f"Contexto del libro:\n{ctx}\n\nAnaliza esta imagen.\n{instruccion_estilo}"
 
                 # EL NERVIO ÓPTICO (Manejo de Bytes)
