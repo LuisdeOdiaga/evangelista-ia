@@ -237,7 +237,7 @@ for mensaje in st.session_state.messages:
 
 # B. La Caja de Entrada Unificada (Arquitectura Nivel Pro)
 with st.form("form_vision", clear_on_submit=True):
-    archivo_img = st.file_uploader("📷 Subir imagen sagrada", type=["jpg", "png", "jpeg"])
+    archivo_img = st.file_uploader("📷 Subir imagen sagrada")
     prompt = st.text_area("Escribe tu duda teológica profunda...", height=100)
     btn_enviar = st.form_submit_button("Enviar Consulta")
 
