@@ -303,32 +303,32 @@ if btn_enviar and (prompt or archivo_img is not None):
                 placeholder.markdown(full_res)
                 st.session_state.messages.append({"role": "assistant", "content": full_res})
 
-            except Exception as e:
+        except Exception as e:
             st.error(f"Hubo una interferencia en el servidor: {e}")
 
-            # --- 4. Motor de Voz (Blindaje Anti-Crash) ---
-            with st.spinner("🎙️ Preparando sermón..."):
-                import edge_tts, asyncio, re
-                texto_voz = full_res.replace("*","").replace("#","")
-                texto_voz = re.sub(r'(\d+):(\d+)', r'\1 \2', texto_voz) 
-            
-            async def voz():
-                c = edge_tts.Communicate(texto_voz, "es-MX-JorgeNeural", rate="+7%")
-                data = b""
-                async for chunk in c.stream():
-                    if chunk["type"] == "audio": data += chunk["data"]
-                return data
-                
-            # El truco para que el servidor no explote con...
-            try:
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+        # --- 4. Motor de Voz (Blindaje Anti-Crash) ---
+        with st.spinner("Preparando sermón..."):
+            import edge_tts, asyncio, re
+            texto_voz = full_res.replace("*","").replace("#","")
+            texto_voz = re.sub(r'(\d+):(\d+)', r'\1 \2', texto_voz)
 
-            audio_generado = loop.run_until_complete(voz())
-            st.session_state.messages[-1]["audio"] = audio_generado
-            st.audio(audio_generado, format="audio/mp3")
+        async def voz():
+            c = edge_tts.Communicate(texto_voz, "es-MX-JorgeNeural")
+            data = b""
+            async for chunk in c.stream():
+                if chunk["type"] == "audio": data += chunk["data"]
+            return data
+
+        # El truco para que el servidor no explote con asincronia
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        audio_generado = loop.run_until_complete(voz())
+        st.session_state.messages[-1]["audio"] = audio_generado
+        st.audio(audio_generado, format="audio/mp3")
 
 # ==========================================
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
