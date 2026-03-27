@@ -235,17 +235,15 @@ for mensaje in st.session_state.messages:
         if "audio" in mensaje:                            # <--- 8 espacios
             st.audio(mensaje["audio"], format="audio/mp3") # <--- 12 espacios
 
-# B. La Caja de Entrada Unificada (Arquitectura Nivel Pro)
-with st.form("form_vision", clear_on_submit=True):
-    with st.expander("➕ Adjuntar Imagen o Pergamino"):
-        archivo_img = st.file_uploader("Sube aquí tu archivo")
-        
-    prompt = st.text_area("Escribe tu duda teológica profunda...", height=100)
-    btn_enviar = st.form_submit_button("Enviar Consulta")
+prompt_escrito = st.chat_input("Escribe tu duda teológica profunda...")
 
 # --- PANEL LATERAL (Las Dudas de Tomás) ---
 with st.sidebar:
     st.title("🛡️ Las Dudas de Tomás")
+    st.markdown("---")
+    st.subheader("🖼️ Ojo Espiritual")
+    archivo_img = st.file_uploader("Adjuntar Imagen o Pergamino", type=["png", "jpg", "jpeg"])
+    st.markdown("---")
     st.markdown("Preguntas teológicas frecuentes:")
     btn_faq1 = st.button("¿Por qué Dios permite el mal?")
     btn_faq2 = st.button("Pruebas de la Resurrección")
@@ -255,12 +253,12 @@ prompt_faq = ""
 if btn_faq1: prompt_faq = "¿Por qué un Dios infinitamente bueno permite el mal y el sufrimiento en el mundo?"
 if btn_faq2: prompt_faq = "Cita las evidencias históricas y bíblicas más contundentes sobre la resurrección de Cristo."
 if btn_faq3: prompt_faq = "¿Cómo se concilia el relato de la creación del Génesis con la ciencia moderna?"
-
-ejecutar = btn_enviar or btn_faq1 or btn_faq2 or btn_faq3
-prompt_final = prompt_faq if prompt_faq else prompt
-
-if ejecutar and (prompt_final or archivo_img is not None):
-    # 1. Burbuja del Usuario
+# --- EL CRUCE DE CABLES ---
+# Tomamos lo que escribió el usuario, o si no, lo que tocó en el botón
+prompt_final = prompt_escrito if prompt_escrito else prompt_faq
+if prompt_final or archivo_img is not None:
+# Si hay una pregunta (por cualquiera de los dos lados), despertamos a la IA
+	    # 1. Burbuja del Usuario
     texto_usuario = prompt_final if prompt_final else "📷 [Imagen enviada]"
     st.session_state.messages.append({"role": "user", "content": texto_usuario})
     with st.chat_message("user"):
