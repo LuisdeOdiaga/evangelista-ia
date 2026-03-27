@@ -355,9 +355,10 @@ if prompt_final:
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
 # ==========================================
 
-    if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
     ultimo_mensaje = st.session_state.messages[-1]['content']
 
+o
     # --- DEPENDENCIAS SEGURAS ---
     import re
     from io import BytesIO
