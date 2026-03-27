@@ -93,10 +93,10 @@ st.markdown("""
 
 # --- INICIALIZACIÓN DEL SISTEMA DE SEGURIDAD ---
 if "autenticado" not in st.session_state:
-    st.session_state.autenticado = True
+    st.session_state.autenticado = False
 
 if "rol" not in st.session_state:
-    st.session_state.rol = "admin"
+    st.session_state.rol = "invitado"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -105,13 +105,12 @@ if "messages" not in st.session_state:
 # EVANGELIZACION MUNDIAL
 # ==========================================
 
-# 1. Inicialización de Memoria de Sesión
+# --- INICIALIZACIÓN DEL SISTEMA DE SEGURIDAD ---
 if "autenticado" not in st.session_state:
-    st.session_state.autenticado = True
+    st.session_state.autenticado = False   # <-- Cambiar a False
+
 if "rol" not in st.session_state:
-    st.session_state.rol = "admin"
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.rol = "invitado"      # <-- Cambiar a "invitado"
 
 # 2. Pantalla de Login (Si no está autenticado)
 if not st.session_state.autenticado:
@@ -241,13 +240,17 @@ prompt_escrito = st.chat_input("Escribe tu duda teológica profunda...")
 with st.sidebar:
     st.title("🛡️ Las Dudas de Tomás")
     st.markdown("---")
+    
     st.subheader("🖼️ Ojo Espiritual")
-    archivo_img = st.file_uploader("Adjuntar Imagen o Pergamino", type=["png", "jpg", "jpeg"])
+    # Escondemos el título redundante para que se vea más limpio
+    archivo_img = st.file_uploader("Adjuntar Imagen o Pergamino", type=["png", "jpg", "jpeg"], label_visibility="collapsed")
     st.markdown("---")
+    
     st.markdown("Preguntas teológicas frecuentes:")
-    btn_faq1 = st.button("¿Por qué Dios permite el mal?")
-    btn_faq2 = st.button("Pruebas de la Resurrección")
-    btn_faq3 = st.button("Ciencia y Génesis")
+    # Botones anchos para que parezcan un menú real
+    btn_faq1 = st.button("¿Por qué Dios permite el mal?", use_container_width=True)
+    btn_faq2 = st.button("Pruebas de la Resurrección", use_container_width=True)
+    btn_faq3 = st.button("Ciencia y Génesis", use_container_width=True)
 
 prompt_faq = ""
 if btn_faq1: prompt_faq = "¿Por qué un Dios infinitamente bueno permite el mal y el sufrimiento en el mundo?"
@@ -256,8 +259,8 @@ if btn_faq3: prompt_faq = "¿Cómo se concilia el relato de la creación del Gé
 # --- EL CRUCE DE CABLES ---
 # Tomamos lo que escribió el usuario, o si no, lo que tocó en el botón
 prompt_final = prompt_escrito if prompt_escrito else prompt_faq
-if prompt_final or archivo_img is not None:
 # Si hay una pregunta (por cualquiera de los dos lados), despertamos a la IA
+if prompt_final:
 	    # 1. Burbuja del Usuario
     texto_usuario = prompt_final if prompt_final else "📷 [Imagen enviada]"
     st.session_state.messages.append({"role": "user", "content": texto_usuario})
@@ -345,13 +348,14 @@ if prompt_final or archivo_img is not None:
 
         audio_generado = loop.run_until_complete(voz())
         st.session_state.messages[-1]["audio"] = audio_generado
-        st.audio(audio_generado, format="audio/mp3")
+        # --- EL VERDADERO ESCUDO ANTI-ECO (Chat) ---
+        st.rerun()
 
 # ==========================================
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
 # ==========================================
 
-if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
+    if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
     ultimo_mensaje = st.session_state.messages[-1]['content']
 
     # --- DEPENDENCIAS SEGURAS ---
@@ -375,7 +379,7 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "assis
         story.append(Paragraph("<b>=== ESTUDIO BÍBLICO: EVANGELISTA IA ===</b>", styles["Heading2"]))
         story.append(Spacer(1, 15))
         
-        for parrafo in texto_limpio.split('\n'):
+        for parrafo in texto_limpio.split('\n'):        st.audio(audio_generado, format="audio/mp3")
             if parrafo.strip():
                 if parrafo.startswith('#'):
                     texto_h = parrafo.replace('#', '').strip()
