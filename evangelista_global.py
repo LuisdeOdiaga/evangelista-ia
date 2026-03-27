@@ -349,6 +349,24 @@ if ejecutar and (prompt_final or archivo_img is not None):
         st.session_state.messages[-1]["audio"] = audio_generado
         st.audio(audio_generado, format="audio/mp3")
 
+        audio_generado = loop.run_until_complete(voz())
+        st.session_state.messages[-1]["audio"] = audio_generado
+        st.audio(audio_generado, format="audio/mp3")
+
+        # --- BAUTIZAR Y EXPORTAR EL MP3 ---
+        nombre_base = re.sub(r'[^\w\s]', '', prompt_final).strip()
+        palabras = nombre_base.split()[:4]
+        nombre_limpio = "_".join(palabras).lower()
+        if not nombre_limpio:
+            nombre_limpio = "estudio_teologico"
+            
+        st.download_button(
+            label="🎵 Guardar Audio MP3",
+            data=audio_generado,
+            file_name=f"{nombre_limpio}.mp3",
+            mime="audio/mpeg"
+        )
+
 # ==========================================
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
 # ==========================================
