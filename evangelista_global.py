@@ -414,27 +414,21 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "assis
         b64_pdf = base64.b64encode(st.session_state.pdf_generado).decode()
         enlace_pdf = f'<a href="data:application/octet-stream;base64,{b64_pdf}" download="Sermon_{marca_tiempo}.pdf" style="text-decoration:none; background-color:#ff4b4b; color:white; padding:10px 20px; border-radius:5px; display:inline-block;">📕 Descargar en PDF</a>'
 
-        # 3. Inyectar botones
-        st.markdown(f"{enlace_txt} &nbsp;&nbsp; {enlace_pdf}", unsafe_allow_html=True)
-
-
-        # --- 4. El Botón del MP3 ---
+        # 3. Preparar el MP3 (Método HTML Seguro)
+        enlace_mp3 = ""
         if st.session_state.messages[-1].get("audio"):
             audio_data = st.session_state.messages[-1]["audio"]
-            import re
+            b64_mp3 = base64.b64encode(audio_data).decode()
             
-            # Rescatar la pregunta original
+            import re
             pregunta = "sermon"
             if len(st.session_state.messages) > 1:
                 pregunta = st.session_state.messages[-2]["content"]
-                
             nombre_limpio = re.sub(r'[^\w\s]', '', pregunta).strip().split()[:4]
             nombre_final = "_".join(nombre_limpio).lower() if nombre_limpio else "sermon"
             
-            st.download_button(
-                label="🎵 Descargar Audio MP3",
-                data=audio_data,
-                file_name=f"{nombre_final}.mp3",
-                mime="audio/mpeg"
-            )
+            enlace_mp3 = f'<a href="data:audio/mpeg;base64,{b64_mp3}" download="{nombre_final}.mp3"><button>🎵 Descargar Audio MP3</button></a>'
+
+        # 4. Inyectar la Trinidad de Botones Juntos
+        st.markdown(f"{enlace_txt} &nbsp;&nbsp; {enlace_pdf} &nbsp;&nbsp; {enlace_mp3}", unsafe_allow_html=True)
 
