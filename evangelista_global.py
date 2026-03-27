@@ -353,20 +353,6 @@ if ejecutar and (prompt_final or archivo_img is not None):
         st.session_state.messages[-1]["audio"] = audio_generado
         st.audio(audio_generado, format="audio/mp3")
 
-        # --- BAUTIZAR Y EXPORTAR EL MP3 ---
-        nombre_base = re.sub(r'[^\w\s]', '', prompt_final).strip()
-        palabras = nombre_base.split()[:4]
-        nombre_limpio = "_".join(palabras).lower()
-        if not nombre_limpio:
-            nombre_limpio = "estudio_teologico"
-            
-        st.download_button(
-            label="🎵 Guardar Audio MP3",
-            data=audio_generado,
-            file_name=f"{nombre_limpio}.mp3",
-            mime="audio/mpeg"
-        )
-
 # ==========================================
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
 # ==========================================
@@ -430,4 +416,25 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "assis
 
         # 3. Inyectar botones
         st.markdown(f"{enlace_txt} &nbsp;&nbsp; {enlace_pdf}", unsafe_allow_html=True)
+
+
+        # --- 4. El Botón del MP3 ---
+        if st.session_state.messages[-1].get("audio"):
+            audio_data = st.session_state.messages[-1]["audio"]
+            import re
+            
+            # Rescatar la pregunta original
+            pregunta = "sermon"
+            if len(st.session_state.messages) > 1:
+                pregunta = st.session_state.messages[-2]["content"]
+                
+            nombre_limpio = re.sub(r'[^\w\s]', '', pregunta).strip().split()[:4]
+            nombre_final = "_".join(nombre_limpio).lower() if nombre_limpio else "sermon"
+            
+            st.download_button(
+                label="🎵 Descargar Audio MP3",
+                data=audio_data,
+                file_name=f"{nombre_final}.mp3",
+                mime="audio/mpeg"
+            )
 
