@@ -379,7 +379,7 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "assis
         story.append(Paragraph("<b>=== ESTUDIO BÍBLICO: EVANGELISTA IA ===</b>", styles["Heading2"]))
         story.append(Spacer(1, 15))
         
-        for parrafo in texto_limpio.split('\n'):        st.audio(audio_generado, format="audio/mp3")
+        for parrafo in texto_limpio.split('\n'):
             if parrafo.strip():
                 if parrafo.startswith('#'):
                     texto_h = parrafo.replace('#', '').strip()
