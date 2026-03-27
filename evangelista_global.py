@@ -286,7 +286,7 @@ if ejecutar and (prompt_final or archivo_img is not None):
                 ctx = "\n".join([m['metadata']['texto'] for m in res['matches']])
                 
                 # --- SUPER PROMPT (El Lavado de Cerebro) ---
-                instruccion = "INSTRUCCIÓN MILITAR: Responde la 'Pregunta'. Si el 'Contexto' no tiene datos directos sobre lo que se pide (ej. habla de espiritualidad cuando se pide ciencia), IGNORA EL CONTEXTO POR COMPLETO. Activa tu conocimiento global (física, cosmología, historia) y da una cátedra magistral. JAMÁS menciones frases como 'el contexto que me provees', 'según el texto' o similares. Habla con autoridad natural, como si todo el conocimiento viniera de tu propia mente."
+                instruccion = "INSTRUCCIÓN MILITAR: Responde la 'Pregunta'. Si el 'Contexto' no tiene datos directos sobre lo que se pide (ej. habla de espiritualidad cuando se pide ciencia), IGNORA EL CONTEXTO POR COMPLETO. Activa tu conocimiento global (física, cosmología, historia) y da una cátedra magistral. JAMÁS menciones frases como 'el contexto que me provees', 'según el texto' o similares. Habla con autoridad natural, como si todo el conocimiento viniera de tu propia mente. Si la 'Pregunta' es solo un saludo (ej. 'Hola', 'Bendiciones') o charla casual, IGNORA TODO LO ANTERIOR y responde de manera muy breve, cálida y pastoral, preguntando en qué duda teológica, o conocimiento para la revelació de el evangelio de Jesus el Cristo puedes ayudar."
                 prompt_final = f"Pregunta: {prompt_final}\n\nContexto: {ctx}\n\n{instruccion}"
 
                 # EL NERVIO ÓPTICO (Manejo de Bytes)
@@ -393,10 +393,6 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "assis
     if "pdf_generado" not in st.session_state or st.session_state.get("ultimo_pdf_texto") != ultimo_mensaje:
         st.session_state.pdf_generado = crear_pdf(ultimo_mensaje)
         st.session_state.ultimo_pdf_texto = ultimo_mensaje
-
-    # --- REPRODUCTOR ÚNICO ---
-    if st.session_state.messages and st.session_state.messages[-1].get("audio"):
-       st.audio(st.session_state.messages[-1]["audio"], format="audio/mp3")
 
     # --- INTERFAZ ANTI-FANTASMAS (HTML Base64) ---
     with st.expander("📥 Opciones de Descarga del Último Sermón", expanded=True):
