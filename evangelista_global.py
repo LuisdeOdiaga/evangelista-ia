@@ -325,7 +325,7 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "assis
         st.session_state.messages[-1]["audio"] = audio_generado
         
     # Recargamos la app para mostrar el reproductor (Va fuera del spinner, pero dentro del IF)
-            st.rerun()
+    st.rerun()
 
 # ==========================================
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
