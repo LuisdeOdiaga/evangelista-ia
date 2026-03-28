@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+from langdetect import detect
 from pinecone import Pinecone
 import os
 import time
@@ -89,56 +90,21 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-# ---------------------------------------------------
-
-# --- INICIALIZACIÓN DEL SISTEMA DE SEGURIDAD ---
-if "autenticado" not in st.session_state:
-    st.session_state.autenticado = False
-
-if "rol" not in st.session_state:
-    st.session_state.rol = "invitado"
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
 
 # ==========================================
 # EVANGELIZACION MUNDIAL
 # ==========================================
 
-# --- INICIALIZACIÓN DEL SISTEMA DE SEGURIDAD ---
-if "autenticado" not in st.session_state:
-    st.session_state.autenticado = False   # <-- Cambiar a False
-
+# --- INICIALIZACIÓN DEL SISTEMA DE SEGURIDAD (La Puerta Oculta) ---
 if "rol" not in st.session_state:
-    st.session_state.rol = "invitado"      # <-- Cambiar a "invitado"
+    # Leemos la URL buscando la llave maestra (?llave=apex)
+    if st.query_params.get("llave") == "apex":
+        st.session_state.rol = "admin"
+    else:
+        st.session_state.rol = "invitado"
 
-# 2. Pantalla de Login (Si no está autenticado)
-if not st.session_state.autenticado:
-    st.markdown("### 🌎 Evangelización Mundial")
-    
-    # Entradas de datos (Fuera del botón para que no se borren)
-    usuario_ingresado = st.text_input("👤 Usuario")
-    clave_ingresada = st.text_input("🔑 Contraseña", type="password")
-    
-    # Definición de llaves maestras
-    admin_u = os.getenv("ADMIN_USER", "admin")
-    admin_p = os.getenv("ADMIN_PASS", "admin")
-    guest_u = os.getenv("GUEST_USER", "invitado")
-    guest_p = os.getenv("GUEST_PASS", "1234")
-
-    if st.button("Entrar"):
-        if usuario_ingresado == admin_u and clave_ingresada == admin_p:
-            st.session_state.autenticado = True
-            st.session_state.rol = "admin"
-            st.rerun()
-        elif usuario_ingresado == guest_u and clave_ingresada == guest_p:
-            st.session_state.autenticado = True
-            st.session_state.rol = "invitado"
-            st.rerun()
-        else:
-            st.error("🚨 Credenciales incorrectas.")
-    
-    st.stop() # Detiene la ejecución aquí si no hay login exitoso
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 # Seguridad: Leer llaves desde Render
 api_key_google = os.getenv("GOOGLE_API_KEY")
@@ -321,29 +287,45 @@ if prompt_final:
             st.error(f"Hubo una interferencia en el servidor: {e}")
 
         # --- 4. Motor de Voz (Blindaje Anti-Crash) ---
-        with st.spinner("Preparando sermón..."):
+        if True:
             import edge_tts, asyncio, re
             texto_voz = full_res.replace("*","").replace("#","")
             texto_voz = re.sub(r'(\d+):(\d+)', r'\1 \2', texto_voz)
 
         async def voz():
-            c = edge_tts.Communicate(texto_voz, "es-MX-JorgeNeural")
+            # 1. Escanear el idioma del texto generado
+            try:
+                idioma = detect(texto_voz)
+            except:
+                idioma = "es" # Sistema de seguridad: si falla, asume español
+            
+            # 2. Enrutador Neuronal de Voces
+            if idioma == "en":
+                locutor = "en-US-ChristopherNeural" # Voz majestuosa en inglés
+            elif idioma == "pt":
+                locutor = "pt-BR-AntonioNeural"     # Voz profunda en portugués
+            else:
+                locutor = "es-MX-JorgeNeural"       # Tu voz oficial en español
+                
+            c = edge_tts.Communicate(texto_voz, locutor)
             data = b""
             async for chunk in c.stream():
                 if chunk["type"] == "audio": data += chunk["data"]
             return data
 
         # El truco para que el servidor no explote con asincronia
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+try:
+    loop = asyncio.get_event_loop()
+except RuntimeError:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-        audio_generado = loop.run_until_complete(voz())
-        st.session_state.messages[-1]["audio"] = audio_generado
-        # --- EL VERDADERO ESCUDO ANTI-ECO (Chat) ---
-        st.rerun()
+with st.spinner("🎙️ Inyectando don de lenguas y forjando audio..."):
+    audio_generado = loop.run_until_complete(voz())
+
+st.session_state.messages[-1]["audio"] = audio_generado
+# --- EL VERDADERO ESCUDO ANTI-ECO (Chat) ---
+st.rerun()
 
 # ==========================================
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
