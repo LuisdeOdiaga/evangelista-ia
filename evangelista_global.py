@@ -10,7 +10,7 @@ import io
 import base64
 import PyPDF2  # <--- ¡ESTA ES LA LLAVE MAESTRA QUE FALTA!
 # Configuración de la interfaz
-st.set_page_config(page_title="Evangelista IA", page_icon="✝️")
+st.set_page_config(page_title="Evangelista IA", page_icon="✝️", initial_sidebar_state="collapsed")
 st.title("✝️ Evangelista IA: Juan 20:30-31")
 st.markdown("### Revelando a Jesús el Cristo al mundo")
 
@@ -104,7 +104,9 @@ if "rol" not in st.session_state:
         st.session_state.rol = "invitado"
 
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [
+        {"role": "assistant", "content": "¡Gracia y paz sean contigo! Es un gozo inmenso tenerte aquí.\n\nDime, ¿en qué verdad profunda de las Sagradas Escrituras anhelas profundizar hoy para equiparte en la misión de la evangelización mundial?", "audio": b""}
+    ]
 
 # Seguridad: Leer llaves desde Render
 api_key_google = os.getenv("GOOGLE_API_KEY")
@@ -193,8 +195,7 @@ for mensaje in st.session_state.messages:
         st.markdown(mensaje["content"])
         if "audio" in mensaje:                            # <--- 8 espacios
             st.audio(mensaje["audio"], format="audio/mp3") # <--- 12 espacios
-
-prompt_escrito = st.chat_input("Escribe tu duda teológica profunda...")
+if prompt := st.chat_input("Escribe tu duda teológica profunda...", max_chars=500):
 
 # --- PANEL LATERAL (Las Dudas de Tomás) ---
 with st.sidebar:
