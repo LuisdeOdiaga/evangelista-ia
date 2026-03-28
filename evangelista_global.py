@@ -286,46 +286,46 @@ if prompt_final:
         except Exception as e:
             st.error(f"Hubo una interferencia en el servidor: {e}")
 
-        # --- 4. Motor de Voz (Blindaje Anti-Crash) ---
-        if True:
-            import edge_tts, asyncio, re
-            texto_voz = full_res.replace("*","").replace("#","")
-            texto_voz = re.sub(r'(\d+):(\d+)', r'\1 \2', texto_voz)
-
-        async def voz():
-            # 1. Escanear el idioma del texto generado
+# --- 4. MOTOR DE VOZ (Arquitectura Unificada) ---
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant" and "audio" not in st.session_state.messages[-1]:
+    with st.spinner("🎙️ Inyectando don de lenguas y forjando audio..."):
+        import edge_tts, asyncio, re
+        
+        # Extraemos el texto directamente de la memoria segura
+        texto_voz = st.session_state.messages[-1]["content"].replace("*", "").replace("#", "")
+        texto_voz = re.sub(r'(\d+):(\d+)', r'\1 \2', texto_voz)
+        
+        async def generar_voz():
             try:
                 idioma = detect(texto_voz)
             except:
-                idioma = "es" # Sistema de seguridad: si falla, asume español
-            
-            # 2. Enrutador Neuronal de Voces
+                idioma = "es"
+                
             if idioma == "en":
-                locutor = "en-US-ChristopherNeural" # Voz majestuosa en inglés
+                locutor = "en-US-ChristopherNeural"
             elif idioma == "pt":
-                locutor = "pt-BR-AntonioNeural"     # Voz profunda en portugués
+                locutor = "pt-BR-AntonioNeural"
             else:
-                locutor = "es-MX-JorgeNeural"       # Tu voz oficial en español
+                locutor = "es-MX-JorgeNeural"
                 
             c = edge_tts.Communicate(texto_voz, locutor)
             data = b""
             async for chunk in c.stream():
                 if chunk["type"] == "audio": data += chunk["data"]
             return data
-
-        # El truco para que el servidor no explote con asincronia
-try:
-    loop = asyncio.get_event_loop()
-except RuntimeError:
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-with st.spinner("🎙️ Inyectando don de lenguas y forjando audio..."):
-    audio_generado = loop.run_until_complete(voz())
-
-st.session_state.messages[-1]["audio"] = audio_generado
-# --- EL VERDADERO ESCUDO ANTI-ECO (Chat) ---
-st.rerun()
+            
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+        # Generamos el audio y lo guardamos en la bóveda
+        audio_generado = loop.run_until_complete(generar_voz())
+        st.session_state.messages[-1]["audio"] = audio_generado
+        
+    # Recargamos la app para mostrar el reproductor (Va fuera del spinner, pero dentro del IF)
+            st.rerun()
 
 # ==========================================
 # 3. ZONA DE EXPORTACIÓN Y AUDIO
