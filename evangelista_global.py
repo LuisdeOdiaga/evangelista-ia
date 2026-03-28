@@ -195,7 +195,7 @@ for mensaje in st.session_state.messages:
         st.markdown(mensaje["content"])
         if "audio" in mensaje:                            # <--- 8 espacios
             st.audio(mensaje["audio"], format="audio/mp3") # <--- 12 espacios
-if prompt := st.chat_input("Escribe tu duda teológica profunda...", max_chars=500):
+prompt_escrito = st.chat_input("Escribe tu duda teológica profunda...", max_chars=500)
 
 # --- PANEL LATERAL (Las Dudas de Tomás) ---
 with st.sidebar:
