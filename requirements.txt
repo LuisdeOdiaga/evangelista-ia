@@ -5,3 +5,5 @@ PyPDF2
 edge-tts
 Pillow
 reportlab
+langdetect==1.0.9
+
