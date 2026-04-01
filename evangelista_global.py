@@ -8,6 +8,7 @@ import asyncio
 from PIL import Image
 import io
 import base64
+import docx
 import PyPDF2  # <--- ¡ESTA ES LA LLAVE MAESTRA QUE FALTA!
 # Configuración de la interfaz
 st.set_page_config(page_title="Evangelista IA", page_icon="✝️", initial_sidebar_state="collapsed")
@@ -150,12 +151,19 @@ def obtener_vector(texto):
 with st.sidebar:
     if st.session_state.rol == "admin":
         st.header("📚 Ingesta Teológica")
-        archivo_pdf = st.file_uploader("Sube un libro (PDF)", type=["pdf"])
-        if archivo_pdf and st.button("🧠 Memorizar"):
+        archivo_subido = st.file_uploader("Sube un pergamino teológico", type=["pdf", "docx"])
+        if archivo_subido and st.button("🧠 Memorizar"):
             with st.spinner("Desmenuzando el pergamino..."):
                 try:
-                    lector = PyPDF2.PdfReader(archivo_pdf)
-                    texto = "".join([p.extract_text() for p in lector.pages])
+                    texto = ""
+                    # 1. Si es Word (.docx)
+                    if archivo_subido.name.endswith(".docx"):
+                        documento_word = docx.Document(archivo_subido)
+                        texto = "\n".join([p.text for p in documento_word.paragraphs])
+                    # 2. Si es PDF (.pdf)
+                    else:
+                        lector = PyPDF2.PdfReader(archivo_subido)
+                        texto = "".join([p.extract_text() for p in lector.pages])
                     frags = [texto[i:i+1000] for i in range(0, len(texto), 1000)]
                     
                     # Barra visual para que veas el avance en tu pantalla
