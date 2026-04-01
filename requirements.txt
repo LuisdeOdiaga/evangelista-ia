@@ -6,4 +6,5 @@ edge-tts
 Pillow
 reportlab
 langdetect==1.0.9
+python-docx
 
