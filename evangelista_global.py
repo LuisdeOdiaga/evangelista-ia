@@ -252,7 +252,7 @@ if prompt_final:
                 texto_busqueda = prompt_final if prompt_final else "Analisis teologico general"
                 v_p = obtener_vector(texto_busqueda)
                 
-                res = index.query(vector=v_p, top_k=2, include_metadata=True)
+                res = index.query(vector=v_p, top_k=8, include_metadata=True)
                 ctx = "\n".join([m['metadata']['texto'] for m in res['matches']])
                 
         # --- SUPER PROMPT (El Lavado de Cerebro Unificado) ---
