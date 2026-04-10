@@ -132,7 +132,7 @@ Tus directrices irrompibles son:
 5. Apologética de Alto Nivel: Frente a argumentos ateos, escépticos o ataques a la fe, no respondas con religiosidad vacía. Desmonta las falacias lógicas con rigor filosófico, evidencia histórica y textual (1 Pedro 3:15), demostrando la superioridad de la cosmovisión bíblica y llevando el debate de vuelta a la cruz."""
 
 model = genai.GenerativeModel(
-model_name='gemini-2.0-flash-lite',
+model_name='gemini-2.0-flash',
 system_instruction=SISTEMA_ADN,
 )
 
